@@ -34,14 +34,14 @@ class GraphSearch {
         Edge(vertices[4], vertices[5], 9)
     )
 
-    fun search() : ShortestPath.State<Vertex> {
+    fun search() : ShortestPath.Path<Vertex> {
         val start = vertices[0]
         val finish = vertices[4]
 
         edges = edges.plus(edges.map { Edge(it.v2, it.v1, it.cost) })
 
         fun generateActions(vertex: Vertex) = edges.filter { it.v1 == vertex }
-            .map { ShortestPath.Action(it.cost, it.v2) }
+            .map { ShortestPath.Edge(it.cost, it.v2) }
 
         return ShortestPath()
             .search(start, { v -> v == finish }, { v -> generateActions(v) })
