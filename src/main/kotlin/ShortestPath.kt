@@ -13,37 +13,38 @@ class ShortestPath {
     //An Edge on the graph relative to a source Vertex.
     data class Edge<V>(val cost: Int, val destination: V)
 
-    //A costed path through the graph, with an ordered list of each Edge traversed
+    //A costed Path through the graph, with an ordered list of each Edge traversed
     data class Path<V>(val cost: Int = 0, val history: List<Edge<V>> = emptyList())
 
-    data class VertexState<Vertex>(val vertex: Vertex, val path: Path<Vertex>)
+    fun <Vertex> search(
+        source: Vertex,
+        isSink: (Vertex) -> Boolean,
+        edges: (Vertex) -> List<Edge<Vertex>>
+    ): Path<Vertex> {
 
-    fun <Vertex> search(source: Vertex,
-                        isSink: (Vertex) -> Boolean,
-                        enumerateEdges: (Vertex) -> List<Edge<Vertex>>)
-            : Path<Vertex> {
-
-        val queue = PriorityQueue<VertexState<Vertex>>(compareBy { it.path.cost })
+        val queue = PriorityQueue<Path<Vertex>>(compareBy { it.cost })
         val visited = mutableMapOf<Vertex, Path<Vertex>>()
 
-        queue.add(VertexState(source, Path()))
+        fun currentVertex(path: Path<Vertex>) = path.history.lastOrNull()?.destination ?: source
+
+        queue.add(Path())
         visited[source] = Path()
 
         while (true) {
 
-            val vertexState = queue.poll() ?: throw Exception("No Path Found")
-
-            if (isSink(vertexState.vertex)) {
-                return vertexState.path
+            val path = queue.poll() ?: throw Exception("No Path Found")
+            val vertex = currentVertex(path)
+            if (isSink(vertex)) {
+                return path
             }
 
-            enumerateEdges(vertexState.vertex).forEach {
-                val nextPath = Path(vertexState.path.cost + it.cost, vertexState.path.history + it)
-                val cheapest= visited[it.destination]?.cost ?: Int.MAX_VALUE
+            edges(vertex).forEach {
+                val nextPath = Path(path.cost + it.cost, path.history + it)
+                val cheapest = visited[it.destination]?.cost ?: Int.MAX_VALUE
 
                 if (nextPath.cost < cheapest) {
-                    queue.add(VertexState(it.destination, nextPath))
-                    visited[vertexState.vertex] = vertexState.path
+                    queue.add(nextPath)
+                    visited[vertex] = path
                 }
             }
         }
