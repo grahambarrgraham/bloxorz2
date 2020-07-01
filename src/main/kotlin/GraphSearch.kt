@@ -23,35 +23,7 @@ object GraphSearch {
         source: Vertex,
         isSink: (Vertex) -> Boolean,
         edges: (Vertex) -> List<Edge<Vertex>>
-    ): Path<Vertex> {
-
-        val queue = PriorityQueue<Path<Vertex>>(compareBy { it.cost })
-        val visited = mutableMapOf<Vertex, Path<Vertex>>()
-
-        fun currentVertex(path: Path<Vertex>) = path.history.lastOrNull()?.destination ?: source
-
-        queue.add(Path())
-        visited[source] = Path()
-
-        while (true) {
-
-            val path = queue.poll() ?: throw NoPathFound()
-            val vertex = currentVertex(path)
-            if (isSink(vertex)) {
-                return path
-            }
-
-            edges(vertex).forEach {
-                val nextPath = Path(path.cost + it.cost, path.history + it)
-                val cheapest = visited[it.destination]?.cost ?: Int.MAX_VALUE
-
-                if (nextPath.cost < cheapest) {
-                    queue.add(nextPath)
-                    visited[vertex] = path
-                }
-            }
-        }
-    }
+    ): Path<Vertex> = allPaths(source, isSink, edges).firstOrNull() ?: throw NoPathFound()
 
 
     /**
@@ -64,7 +36,7 @@ object GraphSearch {
         source: Vertex,
         isSink: (Vertex) -> Boolean,
         edges: (Vertex) -> List<Edge<Vertex>>
-    ): List<Path<Vertex>> {
+    ): Sequence<Path<Vertex>> {
 
         val queue = PriorityQueue<Path<Vertex>>(compareBy<Path<Vertex>> { it.cost }.thenBy { it.history.size })
         val visited = mutableMapOf<Vertex, Path<Vertex>>()
@@ -74,28 +46,25 @@ object GraphSearch {
         queue.add(Path())
         visited[source] = Path()
 
-        val result = mutableListOf<Path<Vertex>>()
+        return sequence {
+            while (true) {
 
-        while (true) {
+                val path = queue.poll() ?: break
+                val vertex = currentVertex(path)
+                if (isSink(vertex)) {
+                    yield(path)
+                }
 
-            val path = queue.poll() ?: break
-            val vertex = currentVertex(path)
-            if (isSink(vertex)) {
-                result.add(path)
-            }
+                edges(vertex).forEach {
+                    val nextPath = Path(path.cost + it.cost, path.history + it)
+                    val cheapest = visited[it.destination]?.cost ?: Int.MAX_VALUE
 
-            edges(vertex).forEach {
-                val nextPath = Path(path.cost + it.cost, path.history + it)
-                val cheapest = visited[it.destination]?.cost ?: Int.MAX_VALUE
-
-                if (nextPath.cost < cheapest) {
-                    queue.add(nextPath)
-                    visited[vertex] = path
+                    if (nextPath.cost < cheapest) {
+                        queue.add(nextPath)
+                        visited[vertex] = path
+                    }
                 }
             }
         }
-
-        return result
-
     }
 }

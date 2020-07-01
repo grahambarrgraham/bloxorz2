@@ -155,12 +155,12 @@ class GraphSearchTest {
     ) {
         val result = allPaths(edges, start, finish)
 
-        result.forEach() {
+        result.forEach {
             println("Cost ${it.cost}")
             println("Edges ${it.history.map { edge -> edge.destination }}")
         }
 
-        val actualPaths = result.map { it -> ExpectedPath(it.cost, it.history.size) }
+        val actualPaths = result.map { ExpectedPath(it.cost, it.history.size) }
 
         assertThat(actualPaths, `is`(expectedPaths))
     }
@@ -174,13 +174,13 @@ class GraphSearchTest {
     ) {
         val result = shortestPath(edges, start, finish)
         println("Cost ${result.cost}")
-        println("Edges ${result.history.map { it -> it.destination }}")
+        println("Edges ${result.history.map { it.destination }}")
         assertThat(result.cost, equalTo(expectedCost))
         assertThat(result.history.size, equalTo(expectedEdges))
     }
 
 
-    fun shortestPath(edges: List<Edge>, start: Vertex, finish: Vertex) : GraphSearch.Path<Vertex> {
+    private fun shortestPath(edges: List<Edge>, start: Vertex, finish: Vertex) : GraphSearch.Path<Vertex> {
 
         val duplexEdges = edges.plus(edges.map { Edge(it.v2, it.v1, it.cost) })
 
@@ -190,14 +190,14 @@ class GraphSearchTest {
         return GraphSearch.shortestPath(start, { v -> v == finish }, { v -> generateActions(v) })
     }
 
-    fun allPaths(edges: List<Edge>, start: Vertex, finish: Vertex) : List<GraphSearch.Path<Vertex>> {
+    private fun allPaths(edges: List<Edge>, start: Vertex, finish: Vertex) : List<GraphSearch.Path<Vertex>> {
 
         val duplexEdges = edges.plus(edges.map { Edge(it.v2, it.v1, it.cost) })
 
         fun generateActions(vertex: Vertex) = duplexEdges.filter { it.v1 == vertex }
             .map { GraphSearch.Edge(it.cost, it.v2) }
 
-        return GraphSearch.allPaths(start, { v -> v == finish }, { v -> generateActions(v) })
+        return GraphSearch.allPaths(start, { v -> v == finish }, { v -> generateActions(v) }).toList()
     }
 
 }
