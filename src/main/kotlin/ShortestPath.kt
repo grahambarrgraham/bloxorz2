@@ -8,13 +8,15 @@ import java.util.PriorityQueue
  * in the graph has an associated cost of traversal, and so the cost of the path from source to sink is defined as
  * the sum of the edge costs' that were traversed on that path.
  */
-class ShortestPath {
+object ShortestPath {
 
     //An Edge on the graph relative to a source Vertex.
     data class Edge<V>(val cost: Int, val destination: V)
 
     //A costed Path through the graph, with an ordered list of each Edge traversed
     data class Path<V>(val cost: Int = 0, val history: List<Edge<V>> = emptyList())
+
+    class NoPathFound : Exception("No path found")
 
     fun <Vertex> search(
         source: Vertex,
@@ -32,7 +34,7 @@ class ShortestPath {
 
         while (true) {
 
-            val path = queue.poll() ?: throw Exception("No Path Found")
+            val path = queue.poll() ?: throw NoPathFound()
             val vertex = currentVertex(path)
             if (isSink(vertex)) {
                 return path
