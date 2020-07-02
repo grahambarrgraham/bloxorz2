@@ -14,17 +14,18 @@ object BloxorzGame {
         X, Y, Z
     }
 
-    enum class Action {
-        Up, Down, Left, Right
+    enum class Action(val code: Char) {
+        Up('U'), Down('D'), Left('L'), Right('R'), Start('S')
     }
 
     data class Block(val location: Location, val orientation: Orientation, val height: Int)
 
-    data class State(val block: Block)
+    data class State(val block: Block, val action: Action)
 
     fun generateMoves(grid: Grid, v: State): List<GraphSearch.Edge<State>> {
 
         return Action.values()
+            .filter { it != Start }
             .map { generateState(it, v) }
             .filter { isLegal(grid, it) }
             .map { GraphSearch.Edge(1, it) }
@@ -39,19 +40,19 @@ object BloxorzGame {
         val orientation = state.block.orientation
 
         return when (Pair(action, orientation)) {
-            Pair(Up, X) -> State(Block(Location(x, y + blockWidth), X, blockHeight))
-            Pair(Up, Y) -> State(Block(Location(x, y + blockHeight), Z, blockHeight))
-            Pair(Up, Z) -> State(Block(Location(x, y + blockWidth), Y, blockHeight))
-            Pair(Down, X) -> State(Block(Location(x, y - blockWidth), X, blockHeight))
-            Pair(Down, Y) -> State(Block(Location(x, y - blockWidth), Z, blockHeight))
-            Pair(Down, Z) -> State(Block(Location(x, y - blockHeight), Y, blockHeight))
-            Pair(Left, X) -> State(Block(Location(x - blockWidth, y), Z, blockHeight))
-            Pair(Left, Y) -> State(Block(Location(x - blockWidth, y), Y, blockHeight))
-            Pair(Left, Z) -> State(Block(Location(x - blockHeight, y), X, blockHeight))
-            Pair(Right, X) -> State(Block(Location(x + blockHeight, y), Z, blockHeight))
-            Pair(Right, Y) -> State(Block(Location(x + blockWidth, y), Y, blockHeight))
-            Pair(Right, Z) -> State(Block(Location(x + blockWidth, y), X, blockHeight))
-            else -> throw RuntimeException("Invalid $action, $orientation")
+            Pair(Up, X) -> State(Block(Location(x, y + blockWidth), X, blockHeight), action)
+            Pair(Up, Y) -> State(Block(Location(x, y + blockHeight), Z, blockHeight), action)
+            Pair(Up, Z) -> State(Block(Location(x, y + blockWidth), Y, blockHeight), action)
+            Pair(Down, X) -> State(Block(Location(x, y - blockWidth), X, blockHeight), action)
+            Pair(Down, Y) -> State(Block(Location(x, y - blockWidth), Z, blockHeight), action)
+            Pair(Down, Z) -> State(Block(Location(x, y - blockHeight), Y, blockHeight), action)
+            Pair(Left, X) -> State(Block(Location(x - blockWidth, y), Z, blockHeight), action)
+            Pair(Left, Y) -> State(Block(Location(x - blockWidth, y), Y, blockHeight), action)
+            Pair(Left, Z) -> State(Block(Location(x - blockHeight, y), X, blockHeight), action)
+            Pair(Right, X) -> State(Block(Location(x + blockHeight, y), Z, blockHeight), action)
+            Pair(Right, Y) -> State(Block(Location(x + blockWidth, y), Y, blockHeight), action)
+            Pair(Right, Z) -> State(Block(Location(x + blockWidth, y), X, blockHeight), action)
+            else -> throw RuntimeException("Invalid action $action in orientation $orientation")
         }
     }
 

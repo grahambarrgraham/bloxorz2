@@ -1,5 +1,6 @@
 package bloxorz
 
+import bloxorz.BloxorzGame.Action.Start
 import bloxorz.BloxorzGame.Block
 import bloxorz.BloxorzGame.Orientation
 import bloxorz.BloxorzGame.Orientation.*
@@ -81,7 +82,7 @@ class BloxorzGameTest {
         expected: Boolean
     ) {
         val grid = BloxorzGrid.load(gridName)
-        val legal = isLegal(grid, State(Block(Location(x, y), orientation, height)))
+        val legal = isLegal(grid, State(Block(Location(x, y), orientation, height), Start))
         assertThat(legal, `is`(expected))
     }
 
