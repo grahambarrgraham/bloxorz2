@@ -1,4 +1,4 @@
-package org.rrabarg
+package search
 
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.equalTo
@@ -12,7 +12,7 @@ class GraphSearchTest {
 
     @Test fun shortestPathHappyCase() {
 
-        val vertices = List(6) { Vertex((it+1).toString()) }
+        val vertices = List(6) { Vertex((it + 1).toString()) }
 
         val edges = listOf(
             Edge(vertices[0], vertices[1], 7),
@@ -31,7 +31,7 @@ class GraphSearchTest {
 
     @Test fun shortestPathSourceAndSinkTheSame() {
 
-        val vertices = List(6) { Vertex((it+1).toString()) }
+        val vertices = List(6) { Vertex((it + 1).toString()) }
 
         val edges = listOf(
             Edge(vertices[0], vertices[1], 7),
@@ -51,7 +51,7 @@ class GraphSearchTest {
 
     @Test(expected = GraphSearch.NoPathFound::class) fun shortestPathNoPathToSink() {
 
-        val vertices = List(7) { Vertex((it+1).toString()) }
+        val vertices = List(7) { Vertex((it + 1).toString()) }
 
         val edges = listOf(
             Edge(vertices[0], vertices[1], 7),
@@ -70,7 +70,7 @@ class GraphSearchTest {
 
     @Test fun shortestPathsChoosePrefersLeastEdges() {
 
-        val vertices = List(6) { Vertex((it+1).toString()) }
+        val vertices = List(6) { Vertex((it + 1).toString()) }
 
         val edges = listOf(
             Edge(vertices[0], vertices[1], 3),
@@ -83,7 +83,7 @@ class GraphSearchTest {
 
     @Test fun allPathsHappyCase() {
 
-        val vertices = List(6) { Vertex((it+1).toString()) }
+        val vertices = List(6) { Vertex((it + 1).toString()) }
 
         val edges = listOf(
             Edge(vertices[0], vertices[1], 7),
@@ -102,12 +102,13 @@ class GraphSearchTest {
             ExpectedPath(23, 2),
             ExpectedPath(26, 3),
             ExpectedPath(28, 3),
-            ExpectedPath(34, 4)))
+            ExpectedPath(34, 4)
+        ))
     }
 
     @Test fun allPathsNoRoute() {
 
-        val vertices = List(7) { Vertex((it+1).toString()) }
+        val vertices = List(7) { Vertex((it + 1).toString()) }
 
         val edges = listOf(
             Edge(vertices[0], vertices[1], 7),
@@ -126,7 +127,7 @@ class GraphSearchTest {
 
     @Test fun allPathsPreferLeastEdges() {
 
-        val vertices = List(4) { Vertex((it+1).toString()) }
+        val vertices = List(4) { Vertex((it + 1).toString()) }
 
         val edges = listOf(
             Edge(vertices[0], vertices[1], 1),
@@ -141,7 +142,8 @@ class GraphSearchTest {
             ExpectedPath(2, 2),
             ExpectedPath(3, 1),
             ExpectedPath(3, 2),
-            ExpectedPath(3, 3)))
+            ExpectedPath(3, 3)
+        ))
     }
 
 
@@ -160,7 +162,12 @@ class GraphSearchTest {
             println("Edges ${it.history.map { edge -> edge.destination }}")
         }
 
-        val actualPaths = result.map { ExpectedPath(it.cost, it.history.size) }
+        val actualPaths = result.map {
+            ExpectedPath(
+                it.cost,
+                it.history.size
+            )
+        }
 
         assertThat(actualPaths, `is`(expectedPaths))
     }
@@ -182,7 +189,13 @@ class GraphSearchTest {
 
     private fun shortestPath(edges: List<Edge>, start: Vertex, finish: Vertex) : GraphSearch.Path<Vertex> {
 
-        val duplexEdges = edges.plus(edges.map { Edge(it.v2, it.v1, it.cost) })
+        val duplexEdges = edges.plus(edges.map {
+            Edge(
+                it.v2,
+                it.v1,
+                it.cost
+            )
+        })
 
         fun generateActions(vertex: Vertex) = duplexEdges.filter { it.v1 == vertex }
             .map { GraphSearch.Edge(it.cost, it.v2) }
@@ -192,7 +205,13 @@ class GraphSearchTest {
 
     private fun allPaths(edges: List<Edge>, start: Vertex, finish: Vertex) : List<GraphSearch.Path<Vertex>> {
 
-        val duplexEdges = edges.plus(edges.map { Edge(it.v2, it.v1, it.cost) })
+        val duplexEdges = edges.plus(edges.map {
+            Edge(
+                it.v2,
+                it.v1,
+                it.cost
+            )
+        })
 
         fun generateActions(vertex: Vertex) = duplexEdges.filter { it.v1 == vertex }
             .map { GraphSearch.Edge(it.cost, it.v2) }

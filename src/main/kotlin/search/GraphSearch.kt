@@ -1,4 +1,4 @@
-package org.rrabarg
+package search
 
 import java.lang.Exception
 import java.util.PriorityQueue
@@ -23,7 +23,11 @@ object GraphSearch {
         source: Vertex,
         isSink: (Vertex) -> Boolean,
         edges: (Vertex) -> List<Edge<Vertex>>
-    ): Path<Vertex> = allPaths(source, isSink, edges).firstOrNull() ?: throw NoPathFound()
+    ): Path<Vertex> = allPaths(
+        source,
+        isSink,
+        edges
+    ).firstOrNull() ?: throw NoPathFound()
 
 
     /**
@@ -56,7 +60,8 @@ object GraphSearch {
                 }
 
                 edges(vertex).forEach {
-                    val nextPath = Path(path.cost + it.cost, path.history + it)
+                    val nextPath =
+                        Path(path.cost + it.cost, path.history + it)
                     val cheapest = visited[it.destination]?.cost ?: Int.MAX_VALUE
 
                     if (nextPath.cost < cheapest) {
