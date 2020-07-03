@@ -82,7 +82,7 @@ class BloxorzGameTest {
         expected: Boolean
     ) {
         val grid = BloxorzGrid.load(gridName)
-        val legal = isLegal(grid, State(Block(Location(x, y), orientation, height), Start))
+        val legal = isLegal(grid, State(Block(Location(x, y), orientation, height), Start, grid.initialRuleState()))
         assertThat(legal, `is`(expected))
     }
 

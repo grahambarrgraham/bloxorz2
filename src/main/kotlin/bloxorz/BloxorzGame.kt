@@ -20,13 +20,15 @@ object BloxorzGame {
 
     data class Block(val location: Location, val orientation: Orientation, val height: Int)
 
-    data class State(val block: Block, val action: Action)
+    data class State(val block: Block, val action: Action, val ruleState: Map<Location, Boolean>)
 
     data class Rule(val type: Type, val subject: Location, val `object`: Location) {
         enum class Type {
             WeakToggle, StrongToggle, WeakClose, StrongClose
         }
     }
+
+    fun initialState(grid: Grid) = State(Block(grid.sourceLocation(), Z, 2), Start, grid.initialRuleState())
 
     fun generateMoves(grid: Grid, v: State): List<GraphSearch.Edge<State>> {
 
@@ -46,18 +48,18 @@ object BloxorzGame {
         val orientation = state.block.orientation
 
         return when (Pair(action, orientation)) {
-            Pair(Up, X) -> State(Block(Location(x, y + blockWidth), X, blockHeight), action)
-            Pair(Up, Y) -> State(Block(Location(x, y + blockHeight), Z, blockHeight), action)
-            Pair(Up, Z) -> State(Block(Location(x, y + blockWidth), Y, blockHeight), action)
-            Pair(Down, X) -> State(Block(Location(x, y - blockWidth), X, blockHeight), action)
-            Pair(Down, Y) -> State(Block(Location(x, y - blockWidth), Z, blockHeight), action)
-            Pair(Down, Z) -> State(Block(Location(x, y - blockHeight), Y, blockHeight), action)
-            Pair(Left, X) -> State(Block(Location(x - blockWidth, y), Z, blockHeight), action)
-            Pair(Left, Y) -> State(Block(Location(x - blockWidth, y), Y, blockHeight), action)
-            Pair(Left, Z) -> State(Block(Location(x - blockHeight, y), X, blockHeight), action)
-            Pair(Right, X) -> State(Block(Location(x + blockHeight, y), Z, blockHeight), action)
-            Pair(Right, Y) -> State(Block(Location(x + blockWidth, y), Y, blockHeight), action)
-            Pair(Right, Z) -> State(Block(Location(x + blockWidth, y), X, blockHeight), action)
+            Pair(Up, X) -> State(Block(Location(x, y + blockWidth), X, blockHeight), action, state.ruleState)
+            Pair(Up, Y) -> State(Block(Location(x, y + blockHeight), Z, blockHeight), action, state.ruleState)
+            Pair(Up, Z) -> State(Block(Location(x, y + blockWidth), Y, blockHeight), action, state.ruleState)
+            Pair(Down, X) -> State(Block(Location(x, y - blockWidth), X, blockHeight), action, state.ruleState)
+            Pair(Down, Y) -> State(Block(Location(x, y - blockWidth), Z, blockHeight), action, state.ruleState)
+            Pair(Down, Z) -> State(Block(Location(x, y - blockHeight), Y, blockHeight), action, state.ruleState)
+            Pair(Left, X) -> State(Block(Location(x - blockWidth, y), Z, blockHeight), action, state.ruleState)
+            Pair(Left, Y) -> State(Block(Location(x - blockWidth, y), Y, blockHeight), action, state.ruleState)
+            Pair(Left, Z) -> State(Block(Location(x - blockHeight, y), X, blockHeight), action, state.ruleState)
+            Pair(Right, X) -> State(Block(Location(x + blockHeight, y), Z, blockHeight), action, state.ruleState)
+            Pair(Right, Y) -> State(Block(Location(x + blockWidth, y), Y, blockHeight), action, state.ruleState)
+            Pair(Right, Z) -> State(Block(Location(x + blockWidth, y), X, blockHeight), action, state.ruleState)
             else -> throw RuntimeException("Invalid action $action in orientation $orientation")
         }
     }

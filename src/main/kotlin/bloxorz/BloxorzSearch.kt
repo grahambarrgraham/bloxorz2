@@ -2,9 +2,9 @@ package bloxorz
 
 import bloxorz.BloxorzGame.Action
 import bloxorz.BloxorzGame.Action.Start
-import bloxorz.BloxorzGame.Orientation.Z
 import bloxorz.BloxorzGame.generateMoves
 import bloxorz.BloxorzGame.generateState
+import bloxorz.BloxorzGame.initialState
 import bloxorz.BloxorzGame.isAtSink
 import bloxorz.BloxorzGame.isLegal
 import search.GraphSearch
@@ -15,7 +15,7 @@ object BloxorzSearch {
     fun shortestPath(filename: String): GraphSearch.Path<BloxorzGame.State> {
 
         val grid = BloxorzGrid.load(filename)
-        val initialState = BloxorzGame.State(BloxorzGame.Block(grid.sourceLocation(), Z, 2), Start)
+        val initialState = initialState(grid)
 
         return GraphSearch.shortestPath(initialState,
             { v -> isAtSink(v, grid) },
@@ -26,7 +26,7 @@ object BloxorzSearch {
     fun allPaths(filename: String): Sequence<GraphSearch.Path<BloxorzGame.State>> {
 
         val grid = BloxorzGrid.load(filename)
-        val initialState = BloxorzGame.State(BloxorzGame.Block(grid.sourceLocation(), Z, 2), Start)
+        val initialState = initialState(grid)
 
         return GraphSearch.allPaths(initialState,
             { v -> isAtSink(v, grid) },
@@ -36,7 +36,7 @@ object BloxorzSearch {
 
     fun playActionList(grid: BloxorzGrid.Grid, actions: List<Action>): Boolean {
 
-        var state = BloxorzGame.State(BloxorzGame.Block(grid.sourceLocation(), Z, 2), Start)
+        var state = initialState(grid)
 
         actions.forEach {
             if (!isLegal(grid, state)) {
@@ -47,6 +47,7 @@ object BloxorzSearch {
 
         return isAtSink (state, grid)
     }
+
 
     fun expandToActionList(condensedFormat: String): List<Action> {
 
@@ -70,8 +71,7 @@ object BloxorzSearch {
         return condensedFormat.substringAfter('[')
             .substringBefore(']')
             .split(", ")
-            .map { it ->
-                expandRepeated(it)
+            .map { expandRepeated(it)
             }.flatten()
     }
 

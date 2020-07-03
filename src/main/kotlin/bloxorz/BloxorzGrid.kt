@@ -52,6 +52,13 @@ object BloxorzGrid {
             }
             throw GridHasNoTileOfType(tileType)
         }
+
+        fun initialRuleState(): Map<Location, Boolean> {
+            return rules
+                .map { it.`object` }
+                .map { Pair(it, this[it.x, it.y].type != Missing) }
+                .toMap()
+        }
     }
 
     fun load(filename: String): Grid {
@@ -96,11 +103,11 @@ object BloxorzGrid {
 
     private fun tile(line: String): List<Tile> {
         return line.split("\\s+".toRegex()).map {
-            when (it) {
-                "p" -> Tile(Normal, it)
-                "s" -> Tile(Source, it)
-                "e" -> Tile(Sink, it)
-                else -> Tile(Missing, it)
+            when (it[0]) {
+                'x' -> Tile(Missing, it)
+                's' -> Tile(Source, it)
+                'e' -> Tile(Sink, it)
+                else -> Tile(Normal, it)
             }
         }
     }
