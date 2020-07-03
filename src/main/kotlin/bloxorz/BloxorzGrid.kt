@@ -13,7 +13,7 @@ object BloxorzGrid {
         Missing, Present;
 
         fun opposite(): TileState {
-            return when(this) {
+            return when (this) {
                 Missing -> Present
                 Present -> Missing
             }
@@ -57,8 +57,8 @@ object BloxorzGrid {
                 .toMap()
         }
 
-        fun ruleAt(loc: Location): Rule? {
-            return rules.find { it.subjectLocation == loc}
+        fun rulesAt(loc: Location): List<Rule> {
+            return rules.filter { it.subjectLocation == loc }
         }
 
     }
@@ -70,27 +70,32 @@ object BloxorzGrid {
             .split("\\s+-+\\s+".toRegex())
 
         val tiles = parts[0].lines().reversed().map(this::tile)
-        val rules = if (parts.size > 1) parts[1].lines().map { rule(it, tiles) } else listOf()
+        val rules = if (parts.size > 1) parts[1].lines().flatMap { rule(it, tiles) } else listOf()
 
         return Grid(tiles, rules)
     }
 
     private fun location(tag: String, tiles: List<List<Tile>>): Location {
-        for (y in tiles.indices) {
-            for (x in tiles[0].indices) {
-                if (tiles[y][x].tag == tag) return Location(x, y)
-            }
-        }
-        throw GridHasNoTileWithTag(tag)
+        return locations(tag, tiles).firstOrNull() ?: throw GridHasNoTileWithTag(tag)
     }
 
-    private fun rule(line: String, tiles: List<List<Tile>>): Rule {
+    private fun locations(tag: String, tiles: List<List<Tile>>): Sequence<Location> {
+        return sequence {
+            for (y in tiles.indices) {
+                for (x in tiles[0].indices) {
+                    if (tiles[y][x].tag == tag) yield(Location(x, y))
+                }
+            }
+        }
+    }
+
+    private fun rule(line: String, tiles: List<List<Tile>>): List<Rule> {
 
         val parts = line.split(" ")
         val subjectTag = parts[0]
         val subjectLocation = location(subjectTag, tiles)
         val objectTag = parts[2]
-        val objectLocation = location(objectTag, tiles)
+        val objectLocations = locations(objectTag, tiles)
         val verb = parts[1].trim()
         val tileTypeIndicator = subjectTag[0]
 
@@ -101,11 +106,11 @@ object BloxorzGrid {
             Pair("closes", 'S') -> Rule.Type.StrongClose
             else -> throw UnknownRuleType(verb)
         }
-        return Rule(type, subjectLocation, objectLocation)
+        return objectLocations.map { Rule(type, subjectLocation, it) }.toList()
     }
 
     private fun tile(line: String): List<Tile> {
-        return line.split("\\s+".toRegex()).map {
+        return line.trim().split("\\s+".toRegex()).map {
             when (it[0]) {
                 'x' -> Tile(Missing, it)
                 'X' -> Tile(Missing, it)

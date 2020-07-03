@@ -28,11 +28,12 @@ class BloxorzGridTest {
     fun graphWithRulesLoads() {
         val load = load("/withtoggles.txt")
         println(load)
-        assertThat(load.rules.size, `is`(4))
+        assertThat(load.rules.size, `is`(5))
         assertThat(load.rules[0], `is`(Rule(WeakToggle, Location(0, 0), Location(3, 2))))
         assertThat(load.rules[1], `is`(Rule(Rule.Type.StrongToggle, Location(4, 0), Location(2, 1))))
-        assertThat(load.rules[2], `is`(Rule(Rule.Type.WeakClose, Location(4, 4), Location(2, 3))))
-        assertThat(load.rules[3], `is`(Rule(Rule.Type.StrongClose, Location(0, 4), Location(0, 1))))
+        assertThat(load.rules[2], `is`(Rule(Rule.Type.StrongToggle, Location(4, 0), Location(3, 1))))
+        assertThat(load.rules[3], `is`(Rule(Rule.Type.WeakClose, Location(4, 4), Location(2, 3))))
+        assertThat(load.rules[4], `is`(Rule(Rule.Type.StrongClose, Location(0, 4), Location(0, 1))))
     }
 
     @Test
@@ -53,6 +54,7 @@ class BloxorzGridTest {
         val expectedInitialState = mapOf(
             Pair(Location(3, 2), Present),
             Pair(Location(2, 1), Missing),
+            Pair(Location(3, 1), Missing),
             Pair(Location(2, 3), Present),
             Pair(Location(0, 1), Present)
         )

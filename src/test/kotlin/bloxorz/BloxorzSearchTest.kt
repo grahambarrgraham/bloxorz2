@@ -41,6 +41,27 @@ class BloxorzSearchTest {
     }
 
     @Test
+    fun level2AllPaths() {
+        val paths = allPaths("/level2.txt").toList()
+        paths.map { condensedFormat(it) }.forEach { println(it) }
+        assertThat(paths.first().cost, `is`(17))
+    }
+
+    @Test
+    fun level3AllPaths() {
+        val paths = allPaths("/level3.txt").toList()
+        paths.map { condensedFormat(it) }.forEach { println(it) }
+        assertThat(paths.first().cost, `is`(19))
+    }
+
+    @Test
+    fun level4AllPaths() {
+        val paths = allPaths("/level4.txt").toList()
+        paths.map { condensedFormat(it) }.forEach { println(it) }
+        assertThat(paths.first().cost, `is`(28))
+    }
+
+    @Test
     fun playActions() {
         val grid = BloxorzGrid.load("/level1.txt")
         assertThat(playActionList(grid, expandToActionList("[R, D2, R2, D, R]")), `is`(true))

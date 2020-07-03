@@ -109,6 +109,15 @@ class BloxorzGameTest {
     }
 
     @Test
+    fun strongToggleAffectsMultiple() {
+        val grid = BloxorzGrid.load("/withToggles.txt")
+        var state = State(Block(Location(4,1), Y, 2), Start, grid.initialRuleState())
+        assertThat(state.ruleState[Location(3,1)], `is`(Missing))
+        state = BloxorzGame.generateNextState(grid, Action.Down, state)
+        assertThat(state.ruleState[Location(3,1)], `is`(Present))
+    }
+
+    @Test
     fun strongCloses() {
         val grid = BloxorzGrid.load("/withToggles.txt")
         var state = State(Block(Location(0,2), Y, 2), Start, grid.initialRuleState())

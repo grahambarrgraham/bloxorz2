@@ -83,7 +83,7 @@ object BloxorzGame {
             }
         }
 
-        val applicableRules = locationsTouching(block).mapNotNull { grid.ruleAt(it) }
+        val applicableRules = locationsTouching(block).flatMap { grid.rulesAt(it) }
         val newRuleState = mutableMapOf<Location, TileState>()
 
         currentRuleState.forEach {
