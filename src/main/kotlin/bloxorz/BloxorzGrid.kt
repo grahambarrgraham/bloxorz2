@@ -53,6 +53,7 @@ object BloxorzGrid {
         return Grid(
             javaClass.getResource(filename)
                 .readText()
+                .split("\\s+-+\\s+.toRegex())[0]")[0]
                 .lines()
                 .reversed()
                 .map(this::tile)
