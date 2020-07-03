@@ -3,7 +3,7 @@ package bloxorz
 import bloxorz.BloxorzGame.Action
 import bloxorz.BloxorzGame.Action.Start
 import bloxorz.BloxorzGame.generateMoves
-import bloxorz.BloxorzGame.generateState
+import bloxorz.BloxorzGame.generateNextState
 import bloxorz.BloxorzGame.initialState
 import bloxorz.BloxorzGame.isAtSink
 import bloxorz.BloxorzGame.isLegal
@@ -42,7 +42,7 @@ object BloxorzSearch {
             if (!isLegal(grid, state)) {
                 return false
             }
-            state = generateState(it, state)
+            state = generateNextState(grid, it, state)
         }
 
         return isAtSink (state, grid)

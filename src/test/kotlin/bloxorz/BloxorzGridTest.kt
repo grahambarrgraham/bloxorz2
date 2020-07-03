@@ -3,7 +3,7 @@ package bloxorz
 import bloxorz.BloxorzGame.Rule
 import bloxorz.BloxorzGame.Rule.Type.WeakToggle
 import bloxorz.BloxorzGrid.Location
-import bloxorz.BloxorzGrid.TileType.*
+import bloxorz.BloxorzGrid.TileState.*
 import bloxorz.BloxorzGrid.load
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.core.Is.`is`
@@ -18,13 +18,11 @@ class BloxorzGridTest {
 
         println(load)
 
-        assertThat(load[0,0].type, `is`(Missing))
-        assertThat(load[16,0].type, `is`(Missing))
-        assertThat(load[16,5].type, `is`(Missing))
-        assertThat(load[0,5].type, `is`(Normal))
-        assertThat(load[1,4].type, `is`(Source))
-        assertThat(load[7,1].type, `is`(Sink))
-    }
+        assertThat(load[0,0].state, `is`(Missing))
+        assertThat(load[16,0].state, `is`(Missing))
+        assertThat(load[16,5].state, `is`(Missing))
+        assertThat(load[0,5].state, `is`(Present))
+        }
 
     @Test
     fun graphWithRulesLoads() {
@@ -40,12 +38,12 @@ class BloxorzGridTest {
     @Test
     fun tilesWithTagsHaveCorrectType() {
         val load = load("/withtoggles.txt")
-        assertThat(load[3,2].type, `is`(Normal))
-        assertThat(load[2,1].type, `is`(Missing))
-        assertThat(load[4,4].type, `is`(Normal))
-        assertThat(load[0,4].type, `is`(Normal))
-        assertThat(load[1,0].type, `is`(Missing))
-        assertThat(load[2,3].type, `is`(Normal))
+        assertThat(load[3,2].state, `is`(Present))
+        assertThat(load[2,1].state, `is`(Missing))
+        assertThat(load[4,4].state, `is`(Present))
+        assertThat(load[0,4].state, `is`(Present))
+        assertThat(load[1,0].state, `is`(Missing))
+        assertThat(load[2,3].state, `is`(Present))
     }
 
     @Test
@@ -53,16 +51,16 @@ class BloxorzGridTest {
         val load = load("/withtoggles.txt")
 
         val expectedInitialState = mapOf(
-            Pair(Location(3, 2), true),
-            Pair(Location(2, 1), false),
-            Pair(Location(2, 3), true),
-            Pair(Location(0, 1), true)
+            Pair(Location(3, 2), Present),
+            Pair(Location(2, 1), Missing),
+            Pair(Location(2, 3), Present),
+            Pair(Location(0, 1), Present)
         )
         assertThat(load.initialRuleState(), `is`(expectedInitialState))
     }
 
     @Test
-    fun soureLocation() {
+    fun sourceLocation() {
         val load = load("/level1.txt")
         println(load)
         assertThat(load.sourceLocation(), `is`(Location(1, 4)))
