@@ -31,7 +31,7 @@ object BloxorzGame {
             .map { GraphSearch.Edge(1, it) }
     }
 
-    private fun generateState(action: Action, state: State): State {
+    fun generateState(action: Action, state: State): State {
 
         val x = state.block.location.x
         val y = state.block.location.y
@@ -75,6 +75,8 @@ object BloxorzGame {
         return locations.none{ isOffGrid(it) || isTileMissing(grid, it) }
 
     }
+
+    fun isAtSink(v: State, grid: Grid) = v.block.location == grid.sinkLocation() && v.block.orientation == Z
 
 
 }
