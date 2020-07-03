@@ -22,6 +22,12 @@ object BloxorzGame {
 
     data class State(val block: Block, val action: Action)
 
+    data class Rule(val type: Type, val subject: Location, val `object`: Location) {
+        enum class Type {
+            WeakToggle, StrongToggle, WeakClose, StrongClose
+        }
+    }
+
     fun generateMoves(grid: Grid, v: State): List<GraphSearch.Edge<State>> {
 
         return Action.values()
