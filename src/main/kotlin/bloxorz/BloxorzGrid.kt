@@ -104,6 +104,9 @@ object BloxorzGrid {
             Pair("toggles", 'S') -> Rule.Type.StrongToggle
             Pair("closes", 'W') -> Rule.Type.WeakClose
             Pair("closes", 'S') -> Rule.Type.StrongClose
+            Pair("opens", 'W') -> Rule.Type.WeakOpen
+            Pair("opens", 'S') -> Rule.Type.StrongOpen
+
             else -> throw UnknownRuleType(verb)
         }
         return objectLocations.map { Rule(type, subjectLocation, it) }.toList()

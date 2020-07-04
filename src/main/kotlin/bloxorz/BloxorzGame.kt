@@ -7,6 +7,7 @@ import bloxorz.BloxorzGrid.Grid
 import bloxorz.BloxorzGrid.Location
 import bloxorz.BloxorzGrid.TileState
 import bloxorz.BloxorzGrid.TileState.Missing
+import bloxorz.BloxorzGrid.TileState.Present
 import search.GraphSearch
 
 
@@ -26,7 +27,7 @@ object BloxorzGame {
 
     data class Rule(val type: Type, val subjectLocation: Location, val objectLocation: Location) {
         enum class Type {
-            WeakToggle, StrongToggle, WeakClose, StrongClose
+            WeakToggle, StrongToggle, WeakClose, StrongClose, WeakOpen, StrongOpen
         }
     }
 
@@ -79,6 +80,8 @@ object BloxorzGame {
                 WeakClose -> Missing
                 StrongClose -> if (orientation == Z) Missing else currentTileState
                 StrongToggle -> if (orientation == Z) currentTileState.opposite() else currentTileState
+                StrongOpen -> if (orientation == Z) Present else currentTileState
+                WeakOpen -> Present
                 else -> currentTileState
             }
         }

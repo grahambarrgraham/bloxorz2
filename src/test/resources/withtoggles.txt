@@ -1,10 +1,12 @@
-S2  x  e  x   W2
-x   x  p3  x   x
-x   x  p   p1  x
-p4  x  x2  x2  x
-W1  x  s   x   S1
+S2  x   e    x    W2
+x   S3  p3   x3   x
+x   W3  p    p1   x
+p4  x4  x2   x2   x
+W1  x   s    x    S1
 ---
 W1 toggles p1
 S1 toggles x2
 W2 closes p3
 S2 closes p4
+S3 opens x3
+W3 opens x4
