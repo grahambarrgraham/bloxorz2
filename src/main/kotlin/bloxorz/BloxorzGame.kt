@@ -74,13 +74,13 @@ object BloxorzGame {
     private fun applyRules(grid: Grid, currentRuleState: Map<Location, TileState>, block: Block)
             : MutableMap<Location, TileState> {
 
-        fun applyRule(rule: Rule?, currentTileState: TileState, orientation: Orientation): TileState {
+        fun applyRule(rule: Rule?, currentTileState: TileState): TileState {
             return when (rule?.type) {
                 WeakToggle -> currentTileState.opposite()
                 WeakClose -> Missing
-                StrongClose -> if (orientation == Z) Missing else currentTileState
-                StrongToggle -> if (orientation == Z) currentTileState.opposite() else currentTileState
-                StrongOpen -> if (orientation == Z) Present else currentTileState
+                StrongClose -> if (block.orientation == Z && block.height > 1) Missing else currentTileState
+                StrongToggle -> if (block.orientation == Z && block.height > 1) currentTileState.opposite() else currentTileState
+                StrongOpen -> if (block.orientation == Z && block.height > 1) Present else currentTileState
                 WeakOpen -> Present
                 else -> currentTileState
             }
@@ -91,7 +91,7 @@ object BloxorzGame {
 
         currentRuleState.forEach {
             val ruleAtLocation = applicableRules.find { rule -> rule.objectLocation == it.key }
-            newRuleState[it.key] = applyRule(ruleAtLocation, it.value, block.orientation)
+            newRuleState[it.key] = applyRule(ruleAtLocation, it.value)
         }
 
         return newRuleState
@@ -101,8 +101,9 @@ object BloxorzGame {
 
         fun isOffGrid(loc: Location) = loc.x < 0 || loc.y < 0 || loc.x >= grid.width || loc.y >= grid.height
         fun isTileMissing(it: Location) = state.ruleState[it] ?: grid[it.x, it.y].state == Missing
+        fun isWeakTileBroken(it: Location) = grid[it.x, it.y].weak && state.block.orientation == Z && state.block.height > 1
 
-        return locationsTouching(state.block).none { isOffGrid(it) || isTileMissing(it) }
+        return locationsTouching(state.block).none { isOffGrid(it) || isTileMissing(it) || isWeakTileBroken(it)}
     }
 
     private fun locationsTouching(block: Block): List<Location> =
