@@ -23,7 +23,7 @@ object BloxorzGrid {
     class GridHasNoTileWithTag(tag: String) : Exception(tag)
 
     data class Tile(val state: TileState, val tag: String) {
-        val weak = listOf('w', 'W').contains(tag[0])
+        val weak = listOf('w').contains(tag[0])
     }
 
     data class Grid(val tiles: List<List<Tile>>, val rules: List<Rule>) {

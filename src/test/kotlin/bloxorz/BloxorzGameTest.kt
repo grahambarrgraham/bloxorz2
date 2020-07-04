@@ -97,6 +97,23 @@ class BloxorzGameTest {
     }
 
     @Test
+    fun touchingWeakSwitchInOrientationZIsLegal() {
+        checkIsLegal("/rules.txt", 0, 0, Z, 2, true)
+    }
+
+    @Test
+    fun touchingWeakSwitchInOrientationXIsLegal() {
+        checkIsLegal("/rules.txt", 0, 0, X, 2, true)
+    }
+
+    @Test
+    fun touchingWeakSwitchInOrientationYIsLegal() {
+        checkIsLegal("/rules.txt", 0, 0, Y, 2, true)
+    }
+
+
+
+    @Test
     fun initialStateOfTaggedTilesWithRulesIsCorrect() {
         //x1, x2, x3, x4
         checkIsLegal("/withToggles.txt", 1, 0, Z, 2, false)

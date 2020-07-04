@@ -1,11 +1,13 @@
 package bloxorz
 
+import bloxorz.BloxorzSearch.IllegalAction
 import bloxorz.BloxorzSearch.allPaths
 import bloxorz.BloxorzSearch.condensedFormat
 import bloxorz.BloxorzSearch.detailedFormat
 import bloxorz.BloxorzSearch.expandToActionList
 import bloxorz.BloxorzSearch.playActionList
 import bloxorz.BloxorzSearch.shortestPath
+import junit.framework.Assert.fail
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
@@ -67,10 +69,11 @@ class BloxorzSearchTest {
         assertThat(playActionList(grid, expandToActionList("[R, D2, R2, D, R]")), `is`(true))
     }
 
-    @Test
+    @Test(expected = IllegalAction::class)
     fun playActionsOffGrid() {
         val grid = BloxorzGrid.load("/level1.txt")
-        assertThat(playActionList(grid, expandToActionList("[L10]")), `is`(false))
+        playActionList(grid, expandToActionList("[L10]"))
+        fail()
     }
 
     @Test

@@ -13,6 +13,8 @@ import java.util.*
 
 object BloxorzSearch {
 
+    class IllegalAction(message: String) : Exception(message)
+
     fun shortestPath(filename: String): Path<BloxorzGame.State> {
 
         val grid = BloxorzGrid.load(filename)
@@ -41,7 +43,7 @@ object BloxorzSearch {
 
         actions.forEach {
             if (!isLegal(grid, state)) {
-                return false
+                return throw IllegalAction("$it was not legal at $state")
             }
             state = generateNextState(grid, it, state)
         }
@@ -79,19 +81,24 @@ object BloxorzSearch {
 
 
     fun condensedFormat(path: Path<BloxorzGame.State>): String {
+        return condensedFormat(path.history.map {it.destination.action.code})
+    }
 
-        val stack = Stack<Action>()
+    fun condensedFormat(path: List<Char>): String {
+
+        val stack = Stack<Char>()
         val result = mutableListOf<String>()
 
         fun purge() {
+            val instructionSymbol = stack.peek()
             if (stack.size == 1)
-                result.add("${stack.peek().code}")
+                result.add("$instructionSymbol")
             else
-                result.add("${stack.peek().code}${stack.size}")
+                result.add("$instructionSymbol${stack.size}")
             stack.clear()
         }
 
-        path.history.map { it.destination.action }.forEach {
+        path.forEach {
             if (!stack.empty() && it != stack.peek()) purge()
             stack.push(it)
         }
@@ -100,7 +107,6 @@ object BloxorzSearch {
 
         return result.toString()
     }
-
 
     fun detailedFormat(path: Path<BloxorzGame.State>): String {
         return path.history.map {
