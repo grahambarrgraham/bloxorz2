@@ -8,11 +8,12 @@ import bloxorz.BloxorzGame.initialState
 import bloxorz.BloxorzGame.isAtSink
 import bloxorz.BloxorzGame.isLegal
 import search.GraphSearch
+import search.GraphSearch.Path
 import java.util.*
 
 object BloxorzSearch {
 
-    fun shortestPath(filename: String): GraphSearch.Path<BloxorzGame.State> {
+    fun shortestPath(filename: String): Path<BloxorzGame.State> {
 
         val grid = BloxorzGrid.load(filename)
         val initialState = initialState(grid)
@@ -23,7 +24,7 @@ object BloxorzSearch {
         )
     }
 
-    fun allPaths(filename: String): Sequence<GraphSearch.Path<BloxorzGame.State>> {
+    fun allPaths(filename: String): Sequence<Path<BloxorzGame.State>> {
 
         val grid = BloxorzGrid.load(filename)
         val initialState = initialState(grid)
@@ -45,7 +46,7 @@ object BloxorzSearch {
             state = generateNextState(grid, it, state)
         }
 
-        return isAtSink (state, grid)
+        return isAtSink(state, grid)
     }
 
 
@@ -71,12 +72,13 @@ object BloxorzSearch {
         return condensedFormat.substringAfter('[')
             .substringBefore(']')
             .split(", ")
-            .map { expandRepeated(it)
+            .map {
+                expandRepeated(it)
             }.flatten()
     }
 
 
-    fun condensedFormat(path: GraphSearch.Path<BloxorzGame.State>): String {
+    fun condensedFormat(path: Path<BloxorzGame.State>): String {
 
         val stack = Stack<Action>()
         val result = mutableListOf<String>()
@@ -100,11 +102,34 @@ object BloxorzSearch {
     }
 
 
-    fun detailedFormat(path: GraphSearch.Path<BloxorzGame.State>): String {
-        return path.history.map { "${it.destination.action.code}" +
-                "->(${it.destination.block.location.x},${it.destination.block.location.y})" +
-                "${it.destination.block.orientation}" }
+    fun detailedFormat(path: Path<BloxorzGame.State>): String {
+        return path.history.map {
+            "${it.destination.action.code}" +
+                    "->(${it.destination.block.location.x},${it.destination.block.location.y})" +
+                    "${it.destination.block.orientation}"
+        }
             .toString()
+    }
+
+    @JvmStatic
+    fun main(args: Array<String>) {
+
+        var totalCost = 0
+        var completedLevels = 0
+
+        (1..33).asSequence().forEach {
+            try {
+                val path = shortestPath("/level${it}.txt")
+                println("level $it : ${path.cost} moves : ${condensedFormat(path)}")
+                totalCost += path.cost
+                completedLevels += 1
+            } catch (e: Exception) {
+                println("level $it failed with $e")
+            }
+        }
+
+        println("Summary : completed $completedLevels of 33 levels, total moves : $totalCost")
+
     }
 
 
