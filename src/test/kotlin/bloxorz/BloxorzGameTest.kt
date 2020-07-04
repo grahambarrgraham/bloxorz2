@@ -91,60 +91,92 @@ class BloxorzGameTest {
     }
 
     @Test
-    fun weakToggle() {
-        checkRule(Location(1, 0), Y, Action.Left, Location(2, 1), Missing)
-        checkRule(Location(0, 1), X, Action.Down, Location(2, 1), Missing)
-    }
-
-    @Test
-    fun strongToggleNoActionIfOrientationIsNotZ() {
-        checkRule(Location(3, 0), Y, Action.Right, Location(2, 1), Missing)
-        checkRule(Location(3, 0), Y, Action.Right, Location(3, 1), Missing)
-        checkRule(Location(3, 1), X, Action.Down, Location(2, 1), Missing)
-        checkRule(Location(3, 1), X, Action.Down, Location(3, 1), Missing)
-    }
-
-    @Test
-    fun strongToggle() {
-        checkRule(Location(4, 1), Y, Action.Down, Location(2, 1), Present)
-    }
-
-    @Test
-    fun ruleCanAffectMultipleTiles() {
-        checkRule(Location(4, 1), Y, Action.Down, Location(3, 1), Present)
-        checkRule(Location(4, 1), Y, Action.Down, Location(2, 1), Present)
+    fun strongOpens() {
+        checkRule(Location(1, 5), X, Action.Left, Location(3, 5), Present)
+        checkRule(Location(1, 5), X, Action.Left, Location(4, 5), Present)
     }
 
     @Test
     fun strongCloses() {
-        checkRule(Location(0, 2), Y, Action.Up, Location(0, 1), Missing)
+        checkRule(Location(1, 4), X, Action.Left, Location(3, 4), Missing)
+        checkRule(Location(1, 4), X, Action.Left, Location(4, 4), Missing)
+
     }
 
     @Test
-    fun weakCloses() {
-        checkRule(Location(4, 2), Z, Action.Up, Location(2, 3), Missing)
-    }
-
-    @Test
-    fun strongOpens() {
-        checkRule(Location(1, 1), Y, Action.Up, Location(3, 3), Present)
-    }
-
-    @Test
-    fun weakOpens() {
-        checkRule(Location(1, 0), Z, Action.Up, Location(1, 1), Present)
-    }
-
-    @Test
-    fun strongCloseNoActionIfOrientationIsNotZ() {
-        checkRule(Location(1, 3), Y, Action.Left, Location(0, 1), Present)
-        checkRule(Location(0, 3), X, Action.Up, Location(0, 1), Present)
+    fun strongToggle() {
+        checkRule(Location(1, 3), X, Action.Left, Location(3, 3), Present)
+        checkRule(Location(1, 3), X, Action.Left, Location(4, 3), Missing)
     }
 
     @Test
     fun strongOpenNoActionIfOrientationIsNotZ() {
-        checkRule(Location(0, 2), Y, Action.Right, Location(3, 3), Missing)
-        checkRule(Location(0, 2), X, Action.Up, Location(3, 3), Missing)
+        checkRule(Location(0, 6), X, Action.Down, Location(3, 5), Missing)
+        checkRule(Location(0, 6), X, Action.Down, Location(4, 5), Present)
+        checkRule(Location(1, 5), Y, Action.Left, Location(3, 5), Missing)
+        checkRule(Location(1, 5), Y, Action.Left, Location(4, 5), Present)
+    }
+
+    @Test
+    fun strongCloseNoActionIfOrientationIsNotZ() {
+        checkRule(Location(0, 5), X, Action.Down, Location(3, 4), Missing)
+        checkRule(Location(0, 5), X, Action.Down, Location(4, 4), Present)
+        checkRule(Location(1, 4), Y, Action.Left, Location(3, 4), Missing)
+        checkRule(Location(1, 4), Y, Action.Left, Location(4, 4), Present)
+    }
+
+    @Test
+    fun strongToggleNoActionIfOrientationIsNotZ() {
+        checkRule(Location(0, 4), X, Action.Down, Location(3, 3), Missing)
+        checkRule(Location(0, 4), X, Action.Down, Location(4, 3), Present)
+        checkRule(Location(1, 3), Y, Action.Left, Location(3, 3), Missing)
+        checkRule(Location(1, 3), Y, Action.Left, Location(4, 3), Present)
+    }
+
+    @Test
+    fun weakOpens() {
+        checkRule(Location(1, 2), X, Action.Left, Location(3, 2), Present)
+        checkRule(Location(1, 2), X, Action.Left, Location(4, 2), Present)
+    }
+
+    @Test
+    fun weakCloses() {
+        checkRule(Location(1, 1), X, Action.Left, Location(3, 1), Missing)
+        checkRule(Location(1, 1), X, Action.Left, Location(4, 1), Missing)
+    }
+
+    @Test
+    fun weakToggle() {
+        checkRule(Location(1, 0), X, Action.Left, Location(3, 0), Present)
+        checkRule(Location(1, 0), X, Action.Left, Location(4, 0), Missing)
+    }
+
+    @Test
+    fun ruleAffectsMultipleTilesWithSameTag() {
+        //tile changed
+        checkRule(Location(1, 6), X, Action.Left, Location(3, 6), Missing)
+        checkRule(Location(1, 6), X, Action.Left, Location(4, 6), Missing)
+
+        //tile not changed
+        checkRule(Location(1, 6), X, Action.Left, Location(3, 7), Missing)
+        checkRule(Location(1, 6), X, Action.Left, Location(4, 7), Missing)
+
+        //tile changed
+        checkRule(Location(1, 7), X, Action.Left, Location(3, 6), Present)
+        checkRule(Location(1, 7), X, Action.Left, Location(4, 6), Present)
+
+        //tile not changed
+        checkRule(Location(1, 7), X, Action.Left, Location(3, 7), Present)
+        checkRule(Location(1, 7), X, Action.Left, Location(4, 7), Present)
+    }
+
+    @Test
+    fun twoSwitchesControlSameTile() {
+        checkRule(Location(1, 8), X, Action.Left, Location(3, 7), Present)
+        checkRule(Location(1, 8), X, Action.Left, Location(4, 7), Present)
+
+        checkRule(Location(1, 8), X, Action.Left, Location(3, 6), Missing)
+        checkRule(Location(1, 8), X, Action.Left, Location(4, 6), Missing)
     }
 
     private fun checkRule(
@@ -155,7 +187,7 @@ class BloxorzGameTest {
         expectedState: BloxorzGrid.TileState
     ) {
         //TODO refactor as fluent
-        val grid = BloxorzGrid.load("/withToggles.txt")
+        val grid = BloxorzGrid.load("/rules.txt")
         var state = State(Block(startLoc, startOrientation, 2), Start, grid.initialRuleState())
         state = BloxorzGame.generateNextState(grid, action, state)
         assertThat(state.ruleState[targetLocation], `is`(expectedState))

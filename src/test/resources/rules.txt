@@ -1,0 +1,29 @@
+S3 x x x  x  x
+S2 x x x7 x7 x
+S1 x x p7 p7 x
+So p p x6 p6 x
+Sc p p x5 p5 x
+St p p x4 p4 x
+Wo p p x3 p3 x
+Wc p p x2 p2 x
+Wt p p x1 p1 x
+---
+So opens x6
+So opens p6
+Sc closes x5
+Sc closes p5
+St toggles x4
+St toggles p4
+
+Wo opens x3
+Wo opens p3
+Wc closes x2
+Wc closes p2
+Wt toggles x1
+Wt toggles p1
+
+S1 toggles p7
+S2 toggles x7
+
+S3 toggles p7
+S3 toggles x7
