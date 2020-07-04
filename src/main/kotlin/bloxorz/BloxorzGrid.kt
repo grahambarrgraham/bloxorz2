@@ -69,11 +69,13 @@ object BloxorzGrid {
             .readText()
             .split("\\s+-+\\s+".toRegex())
 
-        val tiles = parts[0].lines().reversed().map(this::tile)
-        val rules = if (parts.size > 1) parts[1].lines().flatMap { rule(it, tiles) } else listOf()
+        val tiles = lines(parts[0]).reversed().map(this::tile)
+        val rules = if (parts.size > 1) lines(parts[1]).flatMap { rule(it, tiles) } else listOf()
 
         return Grid(tiles, rules)
     }
+
+    private fun lines(gridSection: String) = gridSection.lines().map(String::trim).filterNot(String::isBlank)
 
     private fun location(tag: String, tiles: List<List<Tile>>): Location {
         return locations(tag, tiles).firstOrNull() ?: throw GridHasNoTileWithTag(tag)
