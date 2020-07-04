@@ -30,7 +30,7 @@ class BloxorzGridTest {
     fun graphWithRulesLoads() {
         val load = load("/rules.txt")
         println(load)
-        assertThat(load.rules.size, `is`(20))
+        assertThat(load.rules.size, `is`(24))
 
         //strong switches
         assertThat(load.rules[0], `is`(Rule(Type.StrongOpen, Location(0, 5), Location(3, 5))))
@@ -59,6 +59,12 @@ class BloxorzGridTest {
         assertThat(load.rules[17], `is`(Rule(Type.StrongToggle, Location(0, 8), Location(4, 6))))
         assertThat(load.rules[18], `is`(Rule(Type.StrongToggle, Location(0, 8), Location(3, 7))))
         assertThat(load.rules[19], `is`(Rule(Type.StrongToggle, Location(0, 8), Location(4, 7))))
+
+        //switch affecting multiple tiles, declared in one rule, with comma delimited tags
+        assertThat(load.rules[20], `is`(Rule(Type.StrongToggle, Location(0, 9), Location(3, 6))))
+        assertThat(load.rules[21], `is`(Rule(Type.StrongToggle, Location(0, 9), Location(4, 6))))
+        assertThat(load.rules[22], `is`(Rule(Type.StrongToggle, Location(0, 9), Location(3, 7))))
+        assertThat(load.rules[23], `is`(Rule(Type.StrongToggle, Location(0, 9), Location(4, 7))))
 
     }
 

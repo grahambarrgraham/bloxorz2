@@ -85,42 +85,43 @@ object BloxorzGrid {
         return sequence {
             for (y in tiles.indices) {
                 for (x in tiles[0].indices) {
-                    if (tiles[y][x].tag == tag) yield(Location(x, y))
+                    tag.split(",").map(String::trim).forEach() {
+                    if (tiles[y][x].tag == it) yield(Location(x, y))
                 }
             }
         }
     }
+}
 
-    private fun rule(line: String, tiles: List<List<Tile>>): List<Rule> {
+private fun rule(line: String, tiles: List<List<Tile>>): List<Rule> {
 
-        val parts = line.split(" ")
-        val subjectTag = parts[0]
-        val subjectLocation = location(subjectTag, tiles)
-        val objectTag = parts[2]
-        val objectLocations = locations(objectTag, tiles)
-        val verb = parts[1].trim()
-        val tileTypeIndicator = subjectTag[0]
+    val match = Regex("(\\w+)\\s+(\\w+)\\s+(.+?)$").find(line)!!
+    val (subjectTag, verb, objectTags) = match.destructured
 
-        val type = when (Pair(verb, tileTypeIndicator)) {
-            Pair("toggles", 'W') -> Rule.Type.WeakToggle
-            Pair("toggles", 'S') -> Rule.Type.StrongToggle
-            Pair("closes", 'W') -> Rule.Type.WeakClose
-            Pair("closes", 'S') -> Rule.Type.StrongClose
-            Pair("opens", 'W') -> Rule.Type.WeakOpen
-            Pair("opens", 'S') -> Rule.Type.StrongOpen
+    val subjectLocation = location(subjectTag, tiles)
+    val objectLocations = locations(objectTags, tiles)
+    val tileTypeIndicator = subjectTag[0]
 
-            else -> throw UnknownRuleType(verb)
-        }
-        return objectLocations.map { Rule(type, subjectLocation, it) }.toList()
+    val type = when (Pair(verb, tileTypeIndicator)) {
+        Pair("toggles", 'W') -> Rule.Type.WeakToggle
+        Pair("toggles", 'S') -> Rule.Type.StrongToggle
+        Pair("closes", 'W') -> Rule.Type.WeakClose
+        Pair("closes", 'S') -> Rule.Type.StrongClose
+        Pair("opens", 'W') -> Rule.Type.WeakOpen
+        Pair("opens", 'S') -> Rule.Type.StrongOpen
+
+        else -> throw UnknownRuleType(verb)
     }
+    return objectLocations.map { Rule(type, subjectLocation, it) }.toList()
+}
 
-    private fun tile(line: String): List<Tile> {
-        return line.trim().split("\\s+".toRegex()).map {
-            when (it[0]) {
-                'x' -> Tile(Missing, it)
-                'X' -> Tile(Missing, it)
-                else -> Tile(Present, it)
-            }
+private fun tile(line: String): List<Tile> {
+    return line.trim().split("\\s+".toRegex()).map {
+        when (it[0]) {
+            'x' -> Tile(Missing, it)
+            'X' -> Tile(Missing, it)
+            else -> Tile(Present, it)
         }
     }
+}
 }

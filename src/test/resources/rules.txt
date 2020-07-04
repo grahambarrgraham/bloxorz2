@@ -1,3 +1,4 @@
+S4 x x x  x  x
 S3 x x x  x  x
 S2 x x x7 x7 x
 S1 x x p7 p7 x
@@ -27,3 +28,5 @@ S2 toggles x7
 
 S3 toggles p7
 S3 toggles x7
+
+S4 toggles p7, x7
