@@ -111,8 +111,8 @@ object BloxorzSearch {
     fun detailedFormat(path: Path<BloxorzGame.State>): String {
         return path.history.map {
             "${it.destination.action.code}" +
-                    "->(${it.destination.block.location.x},${it.destination.block.location.y})" +
-                    "${it.destination.block.orientation}"
+                    "->(${it.destination.activeBlock.location.x},${it.destination.activeBlock.location.y})" +
+                    "${it.destination.activeBlock.orientation}"
         }
             .toString()
     }

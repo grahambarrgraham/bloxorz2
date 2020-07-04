@@ -23,7 +23,7 @@ object BloxorzGrid {
     class GridHasNoTileWithTag(tag: String) : Exception(tag)
 
     data class Tile(val state: TileState, val tag: String) {
-        val weak = listOf('w').contains(tag[0])
+        val weak = 'w' == tag[0]
     }
 
     data class Grid(val tiles: List<List<Tile>>, val rules: List<Rule>) {
@@ -111,7 +111,7 @@ private fun rule(line: String, tiles: List<List<Tile>>): List<Rule> {
         Pair("closes", 'S') -> Rule.Type.StrongClose
         Pair("opens", 'W') -> Rule.Type.WeakOpen
         Pair("opens", 'S') -> Rule.Type.StrongOpen
-
+        Pair("teleports", 't') -> Rule.Type.Teleport
         else -> throw UnknownRuleType(verb)
     }
     return objectLocations.map { Rule(type, subjectLocation, it) }.toList()
