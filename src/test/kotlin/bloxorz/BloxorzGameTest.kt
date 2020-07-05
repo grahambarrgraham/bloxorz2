@@ -5,11 +5,14 @@ import bloxorz.BloxorzGame.Action.Start
 import bloxorz.BloxorzGame.Block
 import bloxorz.BloxorzGame.Orientation
 import bloxorz.BloxorzGame.Orientation.*
+import bloxorz.BloxorzGame.Rule.Type.Teleport
 import bloxorz.BloxorzGame.State
 import bloxorz.BloxorzGame.isLegal
 import bloxorz.BloxorzGrid.Location
 import bloxorz.BloxorzGrid.TileState.Missing
 import bloxorz.BloxorzGrid.TileState.Present
+import junit.framework.Assert.assertNull
+import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.core.Is.`is`
 import org.junit.Test
@@ -17,110 +20,126 @@ import org.junit.Test
 class BloxorzGameTest {
 
     @Test
-    fun orientationYIsLegal() {
+    fun orientationY_IsLegal() {
         checkIsLegal("/mostlymissing.txt", 2, 2, Y, 2, true)
     }
 
     @Test
-    fun orientationXIsLegal() {
+    fun orientationX_IsLegal() {
         checkIsLegal("/mostlymissing.txt", 2, 2, X, 2, true)
     }
 
     @Test
-    fun orientationZIsLegal() {
+    fun orientationZ_IsLegal() {
         checkIsLegal("/mostlymissing.txt", 2, 2, Z, 2, true)
     }
 
     @Test
-    fun orientationZOnTopRightBoundaryIsLegal() {
+    fun orientationZOnTopRightBoundary_IsLegal() {
         checkIsLegal("/allnormal.txt", 4, 4, Z, 2, true)
     }
 
     @Test
-    fun overBoundaryInOrientatinoXIsIllegal() {
+    fun overBoundaryInOrientatinoX_IsIllegal() {
         checkIsLegal("/allnormal.txt", 4, 4, X, 2, false)
     }
 
     @Test
-    fun overBoundaryInOrientationYIsIllegal() {
+    fun overBoundaryInOrientationY_IsIllegal() {
         checkIsLegal("/allnormal.txt", 4, 4, Y, 2, false)
     }
 
     @Test
-    fun touchingOneMissingTileInOrientationXIsIllegal() {
+    fun touchingOneMissingTileInOrientationX_IsIllegal() {
         checkIsLegal("/mostlymissing.txt", 2, 3, X, 2, false)
     }
 
     @Test
-    fun touchingOneMissingTileOrientationIsIllegal() {
+    fun touchingOneMissingTileOrientation_IsIllegal() {
         checkIsLegal("/mostlymissing.txt", 2, 3, Y, 2, false)
     }
 
     @Test
-    fun touchingMissingTileInOrientationZIsIllegal() {
+    fun touchingMissingTileInOrientationZ_IsIllegal() {
         checkIsLegal("/mostlymissing.txt", 3, 3, Y, 2, false)
     }
 
     @Test
-    fun invalidLocationIsIllegal() {
+    fun invalidLocation_IsIllegal() {
         checkIsLegal("/allnormal.txt", -1, 0, Y, 2, false)
     }
 
     @Test
-    fun height1TileInOrientationXIsLegal() {
+    fun height1TileInOrientationX_IsLegal() {
         checkIsLegal("/mostlymissing.txt", 2, 3, X, 1, true)
     }
 
     @Test
-    fun height1TileInOrientationYIsLegal() {
+    fun height1TileInOrientationY_IsLegal() {
         checkIsLegal("/mostlymissing.txt", 2, 3, Y, 1, true)
     }
 
     @Test
-    fun touchingWeakTileInOrientationXIsLegal() {
+    fun touchingWeakTileInOrientationX_IsLegal() {
         checkIsLegal("/weak.txt", 0, 1, X, 2, true)
     }
 
     @Test
-    fun touchingWeakTileInOrientationYIsLegal() {
+    fun touchingWeakTileInOrientationY_IsLegal() {
         checkIsLegal("/weak.txt", 1, 0, Y, 2, true)
     }
 
     @Test
-    fun touchingWeakTileInOrientationZIsIllegal() {
+    fun touchingWeakTileInOrientationZ_IsIllegal() {
         checkIsLegal("/weak.txt", 1, 1, Z, 2, false)
     }
 
     @Test
-    fun touchingWeakTileInOrientationZWithHeight1IsLegal() {
+    fun touchingWeakTileInOrientationZWithHeight1_IsLegal() {
         checkIsLegal("/weak.txt", 1, 1, Z, 1, true)
     }
 
     @Test
-    fun touchingWeakSwitchInOrientationZIsLegal() {
+    fun touchingWeakSwitchInOrientationZ_IsLegal() {
         checkIsLegal("/rules.txt", 0, 0, Z, 2, true)
     }
 
     @Test
-    fun touchingWeakSwitchInOrientationXIsLegal() {
+    fun touchingWeakSwitchInOrientationX_IsLegal() {
         checkIsLegal("/rules.txt", 0, 0, X, 2, true)
     }
 
     @Test
-    fun touchingWeakSwitchInOrientationYIsLegal() {
+    fun touchingWeakSwitchInOrientationY_IsLegal() {
         checkIsLegal("/rules.txt", 0, 0, Y, 2, true)
     }
 
-
+    @Test
+    fun touchingTeleportInOrientationZ_IsLegal() {
+        checkIsLegal("/rules.txt", 0, 10, Z, 2, true)
+    }
 
     @Test
-    fun initialStateOfTaggedTilesWithRulesIsCorrect() {
+    fun touchingTeleportInOrientationX_IsLegal() {
+        checkIsLegal("/rules.txt", 0, 10, X, 2, true)
+    }
+
+    @Test
+    fun touchingTeleportInOrientationY_IsLegal() {
+        checkIsLegal("/rules.txt", 0, 10, Y, 2, true)
+    }
+
+    @Test
+    fun initialStateOfTaggedMissingTiles_WithRules_IsCorrect() {
         //x1, x2, x3, x4
         checkIsLegal("/withToggles.txt", 1, 0, Z, 2, false)
         checkIsLegal("/withToggles.txt", 2, 1, Z, 2, false)
         checkIsLegal("/withToggles.txt", 3, 1, Z, 2, false)
         checkIsLegal("/withToggles.txt", 3, 1, Z, 3, false)
+    }
 
+    @Test
+    fun initialStateOfTaggedPresentTiles_WithRules_IsCorrect() {
         //p1, p3, p4
         checkIsLegal("/withToggles.txt", 3, 2, Z, 2, true)
         checkIsLegal("/withToggles.txt", 3, 2, Z, 2, true)
@@ -128,26 +147,26 @@ class BloxorzGameTest {
     }
 
     @Test
-    fun strongOpens() {
+    fun strongOpen_RulesApplied() {
         checkRule(Location(1, 5), X, Action.Left, Location(3, 5), Present)
         checkRule(Location(1, 5), X, Action.Left, Location(4, 5), Present)
     }
 
     @Test
-    fun strongCloses() {
+    fun strongClose_RulesApplied() {
         checkRule(Location(1, 4), X, Action.Left, Location(3, 4), Missing)
         checkRule(Location(1, 4), X, Action.Left, Location(4, 4), Missing)
 
     }
 
     @Test
-    fun strongToggle() {
+    fun strongToggle_OrientationZ_RulesApplied() {
         checkRule(Location(1, 3), X, Action.Left, Location(3, 3), Present)
         checkRule(Location(1, 3), X, Action.Left, Location(4, 3), Missing)
     }
 
     @Test
-    fun strongOpenNoActionIfOrientationIsNotZ() {
+    fun strongOpen_OrientationIsNotZ_NotApplied() {
         checkRule(Location(0, 6), X, Action.Down, Location(3, 5), Missing)
         checkRule(Location(0, 6), X, Action.Down, Location(4, 5), Present)
         checkRule(Location(1, 5), Y, Action.Left, Location(3, 5), Missing)
@@ -155,14 +174,14 @@ class BloxorzGameTest {
     }
 
     @Test
-    fun strongOpenNotActivatedIfOrientationZWithHeight1() {
+    fun strongOpen_BlockHeightIs1_NotApplied() {
         checkRule(Location(1, 5), X, Action.Left, Location(3, 5), Missing, 1)
         checkRule(Location(1, 5), X, Action.Left, Location(4, 5), Present, 1)
     }
 
 
     @Test
-    fun strongCloseNoActionIfOrientationIsNotZ() {
+    fun strongClose_OrientationNotZ_NotApplied() {
         checkRule(Location(0, 5), X, Action.Down, Location(3, 4), Missing)
         checkRule(Location(0, 5), X, Action.Down, Location(4, 4), Present)
         checkRule(Location(1, 4), Y, Action.Left, Location(3, 4), Missing)
@@ -170,14 +189,14 @@ class BloxorzGameTest {
     }
 
     @Test
-    fun strongCloseNotActivatedIfOrientationZWithHeight1() {
+    fun strongClose_BlockIsHeight1_NotApplied() {
         checkRule(Location(1, 4), X, Action.Left, Location(3, 4), Missing, 1)
         checkRule(Location(1, 4), X, Action.Left, Location(4, 4), Present, 1)
     }
 
 
     @Test
-    fun strongToggleNoActionIfOrientationIsNotZ() {
+    fun strongToggle_OrientationNotZ_NotApplied() {
         checkRule(Location(0, 4), X, Action.Down, Location(3, 3), Missing)
         checkRule(Location(0, 4), X, Action.Down, Location(4, 3), Present)
         checkRule(Location(1, 3), Y, Action.Left, Location(3, 3), Missing)
@@ -185,56 +204,103 @@ class BloxorzGameTest {
     }
 
     @Test
-    fun strongToggleNotActivatedIfOrientationZWithHeight1() {
+    fun strongToggle_BlockHeightIs1_NotApplied() {
         checkRule(Location(1, 3), X, Action.Left, Location(3, 3), Missing, 1)
         checkRule(Location(1, 3), X, Action.Left, Location(4, 3), Present, 1)
     }
 
     @Test
-    fun weakOpens() {
+    fun weakOpens_RuleApplied() {
         checkRule(Location(1, 2), X, Action.Left, Location(3, 2), Present)
         checkRule(Location(1, 2), X, Action.Left, Location(4, 2), Present)
     }
 
     @Test
-    fun weakCloses() {
+    fun weakCloses_RuleApplied() {
         checkRule(Location(1, 1), X, Action.Left, Location(3, 1), Missing)
         checkRule(Location(1, 1), X, Action.Left, Location(4, 1), Missing)
     }
 
     @Test
-    fun weakToggle() {
+    fun weakToggle_RuleApplied() {
         checkRule(Location(1, 0), X, Action.Left, Location(3, 0), Present)
         checkRule(Location(1, 0), X, Action.Left, Location(4, 0), Missing)
     }
 
     @Test
-    fun ruleAffectsMultipleTilesWithSameTag() {
-        //tile changed
+    fun multipleTilesWithSameTag_RuleAppliedToAll() {
+
+        //toggled from present to missing
         checkRule(Location(1, 6), X, Action.Left, Location(3, 6), Missing)
         checkRule(Location(1, 6), X, Action.Left, Location(4, 6), Missing)
 
-        //tile not changed
-        checkRule(Location(1, 6), X, Action.Left, Location(3, 7), Missing)
-        checkRule(Location(1, 6), X, Action.Left, Location(4, 7), Missing)
-
-        //tile changed
-        checkRule(Location(1, 7), X, Action.Left, Location(3, 6), Present)
-        checkRule(Location(1, 7), X, Action.Left, Location(4, 6), Present)
-
-        //tile not changed
+        //toggled from missing to present
         checkRule(Location(1, 7), X, Action.Left, Location(3, 7), Present)
         checkRule(Location(1, 7), X, Action.Left, Location(4, 7), Present)
+
     }
 
     @Test
-    fun twoSwitchesControlSameTile() {
+    fun multipleTagged_DifferentTags_TagsWithSame2ndChar_RuleNotApplied() {
+
+        //tiles unchanged
+        checkRule(Location(1, 6), X, Action.Left, Location(3, 7), Missing)
+        checkRule(Location(1, 6), X, Action.Left, Location(4, 7), Missing)
+
+        //tiles unchanged
+        checkRule(Location(1, 7), X, Action.Left, Location(3, 6), Present)
+        checkRule(Location(1, 7), X, Action.Left, Location(4, 6), Present)
+
+    }
+
+    @Test
+    fun twoSwitchesControlSameTile_RuleApplied() {
         checkRule(Location(1, 8), X, Action.Left, Location(3, 7), Present)
         checkRule(Location(1, 8), X, Action.Left, Location(4, 7), Present)
 
         checkRule(Location(1, 8), X, Action.Left, Location(3, 6), Missing)
         checkRule(Location(1, 8), X, Action.Left, Location(4, 6), Missing)
     }
+
+    @Test
+    fun teleport_OrientationZ_RuleApplied() {
+        checkTeleport(Location(0,8), Y, Action.Up, Location(0, 10), Location(4, 0))
+    }
+
+    @Test
+    fun teleport_OrientationX_RuleNotApplied() {
+        checkTeleport(Location(0,9), X, Action.Up, Location(0, 10), firstBlockOrientation = X, firstBlockHeight = 2)
+    }
+
+    @Test
+    fun teleport_OrientationY_RuleNotApplied() {
+        checkTeleport(Location(1,9), Y, Action.Left, Location(0, 9), firstBlockOrientation = Y, firstBlockHeight = 2)
+        checkTeleport(Location(1,10), Y, Action.Left, Location(0, 10), firstBlockOrientation = Y, firstBlockHeight = 2)
+    }
+
+    private fun checkTeleport(
+        startLoc: Location,
+        startOrientation: Orientation,
+        action: Action,
+        firstTargetLocation: Location,
+        secondTargetLocation: Location ?= null,
+        firstBlockOrientation: Orientation = Z,
+        firstBlockHeight: Int = 1
+    ) {
+        //TODO refactor to be fluent fluent
+        val grid = BloxorzGrid.load("/rules.txt")
+        val state = State(Block(startLoc, startOrientation, 2), Start, grid.initialRuleState())
+        val newState = BloxorzGame.generateNextState(grid, action, state)
+        assertThat(newState.ruleState, equalTo(state.ruleState))
+        assertThat(newState.activeBlock, equalTo(Block(firstTargetLocation, firstBlockOrientation, firstBlockHeight)))
+        if (secondTargetLocation == null) {
+            assertNull(newState.secondBlock)
+        } else {
+            assertThat(newState.secondBlock, equalTo(Block(secondTargetLocation, Z, 1)))
+        }
+
+    }
+
 
     private fun checkRule(
         startLoc: Location,
@@ -244,7 +310,7 @@ class BloxorzGameTest {
         expectedState: BloxorzGrid.TileState,
         height: Int = 2
     ) {
-        //TODO refactor as fluent
+        //TODO refactor to be fluent fluent
         val grid = BloxorzGrid.load("/rules.txt")
         var state = State(Block(startLoc, startOrientation, height), Start, grid.initialRuleState())
         state = BloxorzGame.generateNextState(grid, action, state)

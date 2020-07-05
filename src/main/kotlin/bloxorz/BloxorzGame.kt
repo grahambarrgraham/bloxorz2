@@ -23,9 +23,19 @@ object BloxorzGame {
 
     data class Block(val location: Location, val orientation: Orientation, val height: Int)
 
-    data class State(val activeBlock: Block, val action: Action, val ruleState: Map<Location, TileState>, val secondBlock: Block? = null)
+    data class State(
+        val activeBlock: Block,
+        val action: Action,
+        val ruleState: Map<Location, TileState>,
+        val secondBlock: Block? = null
+    )
 
-    data class Rule(val type: Type, val subjectLocation: Location, val objectLocation: Location, val secondObjectLocation: Location ?= null) {
+    data class Rule(
+        val type: Type,
+        val subjectLocation: Location,
+        val objectLocation: Location,
+        val secondObjectLocation: Location? = null
+    ) {
         enum class Type {
             WeakToggle, StrongToggle, WeakClose, StrongClose, WeakOpen, StrongOpen, Teleport
         }
@@ -36,8 +46,8 @@ object BloxorzGame {
     fun generateMoves(grid: Grid, v: State): List<GraphSearch.Edge<State>> {
 
         return Action.values()
-            .filterNot {it == Start}
-            .filterNot {it == SwitchBlock && v.secondBlock == null}
+            .filterNot { it == Start }
+            .filterNot { it == SwitchBlock && v.secondBlock == null }
             .map { generateNextState(grid, it, v) }
             .filter { isLegal(grid, it) }
             .map { GraphSearch.Edge(1, it) }
@@ -52,9 +62,15 @@ object BloxorzGame {
         val orientation = currentState.activeBlock.orientation
 
         if (action == SwitchBlock) {
-            return State(currentState.secondBlock!!, currentState.action, currentState.ruleState, currentState.activeBlock)
+            return State(
+                currentState.secondBlock!!,
+                currentState.action,
+                currentState.ruleState,
+                currentState.activeBlock
+            )
         }
 
+        //move block, create next block
         val nextBlock = when (Pair(action, orientation)) {
             Pair(Up, X) -> Block(Location(x, y + blockWidth), X, blockHeight)
             Pair(Up, Y) -> Block(Location(x, y + blockHeight), Z, blockHeight)
@@ -71,7 +87,20 @@ object BloxorzGame {
             else -> throw RuntimeException("Invalid action $action in orientation $orientation")
         }
 
-        //TODO split block if it hits a teleport
+        //TODO handle switch blocks
+
+        //teleport splits blocks
+        if (nextBlock.orientation == Z) {
+            val rules = grid.rulesAt(nextBlock.location)
+            if (rules.size == 1) {
+                val rule = rules[0]
+                if (rule.type == Teleport) {
+                    val activeBlock = Block(rule.objectLocation, Z, 1)
+                    val block2 = Block(rule.secondObjectLocation!!, Z, 1)
+                    return State(activeBlock, action, currentState.ruleState, block2)
+                }
+            }
+        }
 
         //TODO join blocks if they are next to each other
 
@@ -110,9 +139,10 @@ object BloxorzGame {
 
         fun isOffGrid(loc: Location) = loc.x < 0 || loc.y < 0 || loc.x >= grid.width || loc.y >= grid.height
         fun isTileMissing(it: Location) = state.ruleState[it] ?: grid[it.x, it.y].state == Missing
-        fun isWeakTileBroken(it: Location) = grid[it.x, it.y].weak && state.activeBlock.orientation == Z && state.activeBlock.height > 1
+        fun isWeakTileBroken(it: Location) =
+            grid[it.x, it.y].weak && state.activeBlock.orientation == Z && state.activeBlock.height > 1
 
-        return locationsTouching(state.activeBlock).none { isOffGrid(it) || isTileMissing(it) || isWeakTileBroken(it)}
+        return locationsTouching(state.activeBlock).none { isOffGrid(it) || isTileMissing(it) || isWeakTileBroken(it) }
     }
 
     private fun locationsTouching(block: Block): List<Location> =

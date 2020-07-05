@@ -1,5 +1,5 @@
 t2 x x x  p8 s
-t1 x x x  x  e
+t1 p x x  x  e
 S4 x x x  x  x
 S3 x x x  x  x
 S2 x x x7 x7 x
