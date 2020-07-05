@@ -43,7 +43,7 @@ object BloxorzSearch {
 
         actions.forEach {
             if (!isLegal(grid, state)) {
-                return throw IllegalAction("$it was not legal at $state")
+                throw IllegalAction("$it was not legal at $state")
             }
             state = generateNextState(grid, it, state)
         }
@@ -66,6 +66,7 @@ object BloxorzSearch {
                     'D' -> Action.Down
                     'L' -> Action.Left
                     'R' -> Action.Right
+                    'S' -> Action.SwitchBlock
                     else -> Start
                 }
             }

@@ -9,6 +9,7 @@ import bloxorz.BloxorzGrid.TileState
 import bloxorz.BloxorzGrid.TileState.Missing
 import bloxorz.BloxorzGrid.TileState.Present
 import search.GraphSearch
+import java.lang.Math.abs
 
 
 object BloxorzGame {
@@ -25,10 +26,24 @@ object BloxorzGame {
 
     data class State(
         val activeBlock: Block,
-        val action: Action,
         val ruleState: Map<Location, TileState>,
-        val secondBlock: Block? = null
-    )
+        val inactiveBlock: Block? = null
+    ) {
+        //TODO make this part of Path.
+        //this is a hack to hitch this information, but it isn't actually part part of the Vertex state.  Including
+        //this as part of the state leadds to poorer pruning in the search tree, as the same vertex is navigated
+        //multiple times, once for action will resulted in reaching it
+        var action: Action = Start
+
+        constructor(
+            activeBlock: Block,
+            ruleState: Map<Location, TileState>,
+            inactiveBlock: Block? = null,
+            action: Action
+        ) : this(activeBlock, ruleState, inactiveBlock) {
+            this.action = action
+        }
+    }
 
     data class Rule(
         val type: Type,
@@ -41,13 +56,13 @@ object BloxorzGame {
         }
     }
 
-    fun initialState(grid: Grid) = State(Block(grid.sourceLocation(), Z, 2), Start, grid.initialRuleState())
+    fun initialState(grid: Grid) = State(Block(grid.sourceLocation(), Z, 2), grid.initialRuleState(), action = Start)
 
     fun generateMoves(grid: Grid, v: State): List<GraphSearch.Edge<State>> {
 
         return Action.values()
             .filterNot { it == Start }
-            .filterNot { it == SwitchBlock && v.secondBlock == null }
+            .filterNot { it == SwitchBlock && v.inactiveBlock == null }
             .map { generateNextState(grid, it, v) }
             .filter { isLegal(grid, it) }
             .map { GraphSearch.Edge(1, it) }
@@ -61,17 +76,21 @@ object BloxorzGame {
         val blockWidth = 1
         val orientation = currentState.activeBlock.orientation
 
+        //SwitchBlock, swap active and inactive block
         if (action == SwitchBlock) {
-            return State(
-                currentState.secondBlock!!,
-                currentState.action,
-                currentState.ruleState,
-                currentState.activeBlock
-            )
+            if (currentState.inactiveBlock == null) {
+                return currentState
+            } else
+                return State(
+                    currentState.inactiveBlock,
+                    currentState.ruleState,
+                    currentState.activeBlock,
+                    currentState.action
+                )
         }
 
         //move block, create next block
-        val nextBlock = when (Pair(action, orientation)) {
+        var nextBlock = when (Pair(action, orientation)) {
             Pair(Up, X) -> Block(Location(x, y + blockWidth), X, blockHeight)
             Pair(Up, Y) -> Block(Location(x, y + blockHeight), Z, blockHeight)
             Pair(Up, Z) -> Block(Location(x, y + blockWidth), Y, blockHeight)
@@ -87,8 +106,6 @@ object BloxorzGame {
             else -> throw RuntimeException("Invalid action $action in orientation $orientation")
         }
 
-        //TODO handle switch blocks
-
         //teleport splits blocks
         if (nextBlock.orientation == Z) {
             val rules = grid.rulesAt(nextBlock.location)
@@ -97,17 +114,32 @@ object BloxorzGame {
                 if (rule.type == Teleport) {
                     val activeBlock = Block(rule.objectLocation, Z, 1)
                     val block2 = Block(rule.secondObjectLocation!!, Z, 1)
-                    return State(activeBlock, action, currentState.ruleState, block2)
+                    return State(activeBlock, currentState.ruleState, block2, action)
                 }
             }
         }
 
-        //TODO join blocks if they are next to each other
+        //var join blocks in to single block if they are adjacent
+        var inactiveBlock = currentState.inactiveBlock
+        if (inactiveBlock != null && adjacent(nextBlock.location, inactiveBlock.location)) {
+            nextBlock = join(nextBlock, inactiveBlock)
+            inactiveBlock = null
+        }
 
         val newRuleState = applyRules(grid, currentState.ruleState, nextBlock)
 
-        return State(nextBlock, action, newRuleState)
+        return State(nextBlock, newRuleState, inactiveBlock = inactiveBlock, action = action)
     }
+
+    private fun join(a: Block, b: Block): Block {
+        return if (a.location.x < b.location.x) Block(a.location, X, 2)
+        else if (b.location.x < a.location.x) Block(b.location, X, 2)
+        else if (a.location.y < b.location.y) Block(a.location, Y, 2)
+        else if (b.location.y < a.location.y) Block(b.location, Y, 2)
+        else throw Exception("Can't join $a and $b, they are the same")
+    }
+
+    private fun adjacent(a: Location, b: Location): Boolean = abs(a.x - b.x) + abs(a.y - b.y) == 1
 
     private fun applyRules(grid: Grid, currentRuleState: Map<Location, TileState>, block: Block)
             : MutableMap<Location, TileState> {
@@ -152,7 +184,10 @@ object BloxorzGame {
             else -> listOf(block.location)
         }
 
-    fun isAtSink(v: State, grid: Grid) = v.activeBlock.location == grid.sinkLocation() && v.activeBlock.orientation == Z
-
+    fun isAtSink(state: State, grid: Grid) =
+        state.activeBlock.location == grid.sinkLocation()
+                && state.activeBlock.orientation == Z
+                && state.activeBlock.height > 1
+                && state.inactiveBlock == null
 
 }

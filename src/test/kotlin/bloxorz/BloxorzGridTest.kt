@@ -148,10 +148,17 @@ class BloxorzGridTest {
     }
 
     @Test
-    fun sourceLocation() {
+    fun sourceLocation_WithoutTag_IsFound() {
         val load = load("/level1.txt")
         println(load)
         assertThat(load.sourceLocation(), `is`(Location(1, 4)))
+    }
+
+    @Test
+    fun sourceLocation_WithTag_IsFound() {
+        val load = load("/sourceWithTag.txt")
+        println(load)
+        assertThat(load.sourceLocation(), `is`(Location(2, 3)))
     }
 
     @Test

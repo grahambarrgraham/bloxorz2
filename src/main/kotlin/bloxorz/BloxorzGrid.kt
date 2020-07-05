@@ -46,7 +46,7 @@ object BloxorzGrid {
         }
 
         fun sourceLocation(): Location {
-            return location("s", tiles)
+            return location("s", tiles, {a,b -> a.startsWith(b)})
         }
 
         fun sinkLocation(): Location {
@@ -81,16 +81,20 @@ object BloxorzGrid {
 
     private fun lines(gridSection: String) = gridSection.lines().map(String::trim).filterNot(String::isBlank)
 
-    private fun location(tag: String, tiles: List<List<Tile>>): Location {
-        return locations(tag, tiles).firstOrNull() ?: throw GridHasNoTileWithTag(tag)
+    private fun location(
+        tag: String,
+        tiles: List<List<Tile>>,
+        f: (String, String) -> Boolean = { a, b -> a == b }
+    ): Location {
+        return locations(tag, tiles, f).firstOrNull() ?: throw GridHasNoTileWithTag(tag)
     }
 
-    private fun locations(tag: String, tiles: List<List<Tile>>): Sequence<Location> {
+    private fun locations(tag: String, tiles: List<List<Tile>>, f: (String, String) -> Boolean): Sequence<Location> {
         return sequence {
             tag.split(",").map(String::trim).forEach() {
                 for (y in tiles.indices) {
                     for (x in tiles[0].indices) {
-                        if (tiles[y][x].tag == it) yield(Location(x, y))
+                        if (f(tiles[y][x].tag, it)) yield(Location(x, y))
                     }
                 }
             }
@@ -103,7 +107,7 @@ object BloxorzGrid {
         val (subjectTag, verb, objectTags) = match.destructured
 
         val subjectLocation = location(subjectTag, tiles)
-        val objectLocations = locations(objectTags, tiles).toList()
+        val objectLocations = locations(objectTags, tiles, {a,b -> a == b}).toList()
         val tileTypeIndicator = subjectTag[0]
 
         val type = when (Pair(verb, tileTypeIndicator)) {
