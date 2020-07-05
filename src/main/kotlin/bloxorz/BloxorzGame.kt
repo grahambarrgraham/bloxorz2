@@ -25,7 +25,7 @@ object BloxorzGame {
 
     data class State(val activeBlock: Block, val action: Action, val ruleState: Map<Location, TileState>, val secondBlock: Block? = null)
 
-    data class Rule(val type: Type, val subjectLocation: Location, val objectLocation: Location) {
+    data class Rule(val type: Type, val subjectLocation: Location, val objectLocation: Location, val secondObjectLocation: Location ?= null) {
         enum class Type {
             WeakToggle, StrongToggle, WeakClose, StrongClose, WeakOpen, StrongOpen, Teleport
         }

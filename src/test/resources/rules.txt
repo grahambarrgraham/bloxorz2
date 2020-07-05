@@ -1,3 +1,5 @@
+t2 x x x  p8 s
+t1 x x x  x  e
 S4 x x x  x  x
 S3 x x x  x  x
 S2 x x x7 x7 x
@@ -30,3 +32,6 @@ S3 toggles p7
 S3 toggles x7
 
 S4 toggles p7, x7
+
+t1 teleports t1, p1
+t2 teleports p8, Wt
