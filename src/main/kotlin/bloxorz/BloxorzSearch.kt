@@ -113,7 +113,7 @@ object BloxorzSearch {
         return path.history.map {
             "${it.destination.action.code}" +
                     "->(${it.destination.activeBlock.location.x},${it.destination.activeBlock.location.y})" +
-                    "${it.destination.activeBlock.orientation}"
+                    "${it.destination.activeBlock.orientation}/${it.destination.activeBlock.height}"
         }
             .toString()
     }
@@ -124,10 +124,12 @@ object BloxorzSearch {
         var totalCost = 0
         var completedLevels = 0
 
-        (1..33).asSequence().forEach {
+        (1..33).asSequence().filterNot { listOf(23, 26, 28).contains(it) }.forEach {
             try {
                 val path = shortestPath("/level${it}.txt")
-                println("level $it : ${path.cost} moves : ${condensedFormat(path)}")
+                val condensedFormat = condensedFormat(path)
+                println("level $it : ${path.cost} moves : $condensedFormat")
+
                 totalCost += path.cost
                 completedLevels += 1
             } catch (e: Exception) {
@@ -136,8 +138,6 @@ object BloxorzSearch {
         }
 
         println("Summary : completed $completedLevels of 33 levels, total moves : $totalCost")
-
     }
-
 
 }

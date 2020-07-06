@@ -22,6 +22,7 @@ object BloxorzGrid {
     }
 
     class GridHasNoTileWithTag(tag: String) : Exception(tag)
+    class TeleportRuleInvalid(message: String) : Exception(message)
 
     data class Tile(val state: TileState, val tag: String) {
         val weak = 'w' == tag[0]
@@ -81,26 +82,6 @@ object BloxorzGrid {
 
     private fun lines(gridSection: String) = gridSection.lines().map(String::trim).filterNot(String::isBlank)
 
-    private fun location(
-        tag: String,
-        tiles: List<List<Tile>>,
-        f: (String, String) -> Boolean = { a, b -> a == b }
-    ): Location {
-        return locations(tag, tiles, f).firstOrNull() ?: throw GridHasNoTileWithTag(tag)
-    }
-
-    private fun locations(tag: String, tiles: List<List<Tile>>, f: (String, String) -> Boolean): Sequence<Location> {
-        return sequence {
-            tag.split(",").map(String::trim).forEach() {
-                for (y in tiles.indices) {
-                    for (x in tiles[0].indices) {
-                        if (f(tiles[y][x].tag, it)) yield(Location(x, y))
-                    }
-                }
-            }
-        }
-    }
-
     private fun rule(line: String, tiles: List<List<Tile>>): List<Rule> {
 
         val match = Regex("(\\w+)\\s+(\\w+)\\s+(.+?)$").find(line)!!
@@ -122,9 +103,32 @@ object BloxorzGrid {
         }
 
         if (type == Teleport) {
+            if (objectLocations.size != 2) {
+                throw TeleportRuleInvalid("Wrong number of object locations, expected 2 but found $objectLocations")
+            }
             return listOf(Rule(type, subjectLocation, objectLocations[0], objectLocations[1]))
         } else {
             return objectLocations.map { Rule(type, subjectLocation, it) }.toList()
+        }
+    }
+
+    private fun location(
+        tag: String,
+        tiles: List<List<Tile>>,
+        f: (String, String) -> Boolean = { a, b -> a == b }
+    ): Location {
+        return locations(tag, tiles, f).firstOrNull() ?: throw GridHasNoTileWithTag(tag)
+    }
+
+    private fun locations(tag: String, tiles: List<List<Tile>>, f: (String, String) -> Boolean): Sequence<Location> {
+        return sequence {
+            tag.split(",").map(String::trim).forEach() {
+                for (y in tiles.indices) {
+                    for (x in tiles[0].indices) {
+                        if (f(tiles[y][x].tag, it)) yield(Location(x, y))
+                    }
+                }
+            }
         }
     }
 

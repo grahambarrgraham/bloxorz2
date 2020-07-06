@@ -2,6 +2,7 @@ package bloxorz
 
 import bloxorz.BloxorzGame.Action
 import bloxorz.BloxorzGame.Action.Start
+import bloxorz.BloxorzGame.Action.SwitchBlock
 import bloxorz.BloxorzGame.Block
 import bloxorz.BloxorzGame.Orientation
 import bloxorz.BloxorzGame.Orientation.*
@@ -304,6 +305,7 @@ class BloxorzGameTest {
         assertThat(newState.ruleState, equalTo(state.ruleState))
         assertThat(newState.activeBlock, equalTo(block2))
         assertThat(newState.inactiveBlock, equalTo(block1))
+        assertThat(newState.action, equalTo(SwitchBlock))
     }
 
     @Test

@@ -25,7 +25,7 @@ class BloxorzSearchTest {
     fun detailedPath() {
         val path = shortestPath("/level1.txt")
         val s = detailedFormat(path)
-        assertThat(s, `is`("[R->(2,4)X, D->(2,3)X, D->(2,2)X, R->(4,2)Z, R->(5,2)X, D->(5,1)X, R->(7,1)Z]"))
+        assertThat(s, `is`("[R->(2,4)X/2, D->(2,3)X/2, D->(2,2)X/2, R->(4,2)Z/2, R->(5,2)X/2, D->(5,1)X/2, R->(7,1)Z/2]"))
     }
 
     @Test

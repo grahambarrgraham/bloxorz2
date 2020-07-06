@@ -19,7 +19,7 @@ object BloxorzGame {
     }
 
     enum class Action(val code: Char) {
-        Up('U'), Down('D'), Left('L'), Right('R'), Start('S'), SwitchBlock('B')
+        Up('U'), Down('D'), Left('L'), Right('R'), Start('B'), SwitchBlock('S')
     }
 
     data class Block(val location: Location, val orientation: Orientation, val height: Int)
@@ -80,13 +80,15 @@ object BloxorzGame {
         if (action == SwitchBlock) {
             if (currentState.inactiveBlock == null) {
                 return currentState
-            } else
-                return State(
+            } else {
+                val state = State(
                     currentState.inactiveBlock,
                     currentState.ruleState,
                     currentState.activeBlock,
-                    currentState.action
+                    SwitchBlock
                 )
+                return state
+            }
         }
 
         //move block, create next block
@@ -114,7 +116,9 @@ object BloxorzGame {
                 if (rule.type == Teleport) {
                     val activeBlock = Block(rule.objectLocation, Z, 1)
                     val block2 = Block(rule.secondObjectLocation!!, Z, 1)
-                    return State(activeBlock, currentState.ruleState, block2, action)
+                    val state = State(activeBlock, currentState.ruleState, block2, action)
+
+                    return state
                 }
             }
         }
