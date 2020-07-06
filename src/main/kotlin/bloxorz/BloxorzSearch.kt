@@ -15,15 +15,21 @@ object BloxorzSearch {
 
     class IllegalAction(message: String) : Exception(message)
 
-    fun shortestPath(filename: String): Path<BloxorzGame.State> {
+    data class SearchMetrics(val expansions:Int)
+    data class ShortestPathResult(val path: Path<BloxorzGame.State>, val metrics: SearchMetrics)
+
+    fun shortestPath(filename: String): ShortestPathResult {
 
         val grid = BloxorzGrid.load(filename)
         val initialState = initialState(grid)
+        var expansions = 0
 
-        return GraphSearch.shortestPath(initialState,
+        val shortestPath = GraphSearch.shortestPath(initialState,
             { v -> isAtSink(v, grid) },
-            { v -> generateMoves(grid, v) }
+            { v -> expansions++; generateMoves(grid, v) }
         )
+
+        return ShortestPathResult(shortestPath, SearchMetrics(expansions))
     }
 
     fun allPaths(filename: String): Sequence<Path<BloxorzGame.State>> {
@@ -127,11 +133,11 @@ object BloxorzSearch {
         (1..33).asSequence().filterNot { listOf(23, 26, 28).contains(it) }.forEach {
             try {
                 var millis: Long = 0L
-                val path = measureTimeMillis({time -> millis = time}) {shortestPath("/level${it}.txt")}
-                val condensedFormat = condensedFormat(path)
-                println("level $it : ${path.cost} moves : $condensedFormat took $millis ms")
+                val searchResult = measureTimeMillis({ time -> millis = time}) {shortestPath("/level${it}.txt")}
+                val condensedFormat = condensedFormat(searchResult.path)
+                println("level $it : ${searchResult.path.cost} moves : $condensedFormat took $millis ms with ${searchResult.metrics.expansions} expansions")
 
-                totalCost += path.cost
+                totalCost += searchResult.path.cost
                 completedLevels += 1
             } catch (e: Exception) {
                 println("level $it failed with $e")

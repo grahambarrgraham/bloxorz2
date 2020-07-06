@@ -53,6 +53,7 @@ object GraphSearch {
         return sequence {
             while (true) {
 
+
                 val path = queue.poll() ?: break
                 val vertex = currentVertex(path)
                 if (isSink(vertex)) {

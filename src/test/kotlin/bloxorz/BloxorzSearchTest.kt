@@ -16,21 +16,18 @@ class BloxorzSearchTest {
 
     @Test
     fun condensePath() {
-        val path = shortestPath("/level1.txt")
-        val condensed = condensedFormat(path)
-        assertThat(condensed, `is`("[R, D2, R2, D, R]"))
+        assertThat(condensedFormat(shortestPath("/level1.txt").path), `is`("[R, D2, R2, D, R]"))
     }
 
     @Test
     fun detailedPath() {
-        val path = shortestPath("/level1.txt")
-        val s = detailedFormat(path)
+        val s = detailedFormat(shortestPath("/level1.txt").path)
         assertThat(s, `is`("[R->(2,4)X/2, D->(2,3)X/2, D->(2,2)X/2, R->(4,2)Z/2, R->(5,2)X/2, D->(5,1)X/2, R->(7,1)Z/2]"))
     }
 
     @Test
     fun level1ShortestPath() {
-        val path = shortestPath("/level1.txt")
+        val path = shortestPath("/level1.txt").path
         println(condensedFormat(path))
         assertThat(path.cost, `is`(7))
     }
