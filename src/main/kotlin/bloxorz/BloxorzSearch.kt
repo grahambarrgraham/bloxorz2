@@ -126,9 +126,10 @@ object BloxorzSearch {
 
         (1..33).asSequence().filterNot { listOf(23, 26, 28).contains(it) }.forEach {
             try {
-                val path = shortestPath("/level${it}.txt")
+                var millis: Long = 0L
+                val path = measureTimeMillis({time -> millis = time}) {shortestPath("/level${it}.txt")}
                 val condensedFormat = condensedFormat(path)
-                println("level $it : ${path.cost} moves : $condensedFormat")
+                println("level $it : ${path.cost} moves : $condensedFormat took $millis ms")
 
                 totalCost += path.cost
                 completedLevels += 1
@@ -140,4 +141,13 @@ object BloxorzSearch {
         println("Summary : completed $completedLevels of 33 levels, total moves : $totalCost")
     }
 
+    inline fun <T> measureTimeMillis(loggingFunction: (Long) -> Unit,
+                                     function: () -> T): T {
+
+        val startTime = System.currentTimeMillis()
+        val result: T = function.invoke()
+        loggingFunction.invoke(System.currentTimeMillis() - startTime)
+
+        return result
+    }
 }
