@@ -129,8 +129,8 @@ object BloxorzSearch {
 
         var totalCost = 0
         var completedLevels = 0
-
-        (1..33).asSequence().filterNot { listOf(23, 26, 28).contains(it) }.forEach {
+            //.filterNot { listOf(23, 26, 28).contains(it) }
+        (1..33).asSequence().filterNot { listOf(23).contains(it) }.forEach {
             try {
                 var millis: Long = 0L
                 val searchResult = measureTimeMillis({ time -> millis = time}) {shortestPath("/level${it}.txt")}

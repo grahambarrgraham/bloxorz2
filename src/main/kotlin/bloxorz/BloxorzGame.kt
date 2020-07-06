@@ -92,7 +92,16 @@ object BloxorzGame {
         }
 
         //move block, create next block
-        var nextBlock = when (Pair(action, orientation)) {
+        var nextBlock = if (blockHeight == 1) {
+            //optimisation - when block is height 1, orientation is not important, so remove it from the search space
+            when(action) {
+                Up -> Block(Location(x, y+1), Z, 1)
+                Down -> Block(Location(x, y-1), Z, 1)
+                Left -> Block(Location(x-1, y), Z, 1)
+                Right -> Block(Location(x+1, y), Z, 1)
+                else -> throw RuntimeException("Invalid action $action in orientation $orientation")
+            }
+        } else when (Pair(action, orientation)) {
             Pair(Up, X) -> Block(Location(x, y + blockWidth), X, blockHeight)
             Pair(Up, Y) -> Block(Location(x, y + blockHeight), Z, blockHeight)
             Pair(Up, Z) -> Block(Location(x, y + blockWidth), Y, blockHeight)
@@ -107,6 +116,7 @@ object BloxorzGame {
             Pair(Right, Z) -> Block(Location(x + blockWidth, y), X, blockHeight)
             else -> throw RuntimeException("Invalid action $action in orientation $orientation")
         }
+
 
         //teleport splits blocks
         if (nextBlock.orientation == Z) {

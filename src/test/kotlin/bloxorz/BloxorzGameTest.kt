@@ -325,7 +325,7 @@ class BloxorzGameTest {
         val state = State(block1, grid.initialRuleState(), block2)
         val newState = BloxorzGame.generateNextState(grid, Action.Right, state)
         assertThat(newState.ruleState, equalTo(state.ruleState))
-        assertThat(newState.activeBlock, equalTo(Block(Location(1, 0), X, 1)))
+        assertThat(newState.activeBlock, equalTo(Block(Location(1, 0), Z, 1)))
         assertThat(newState.inactiveBlock, equalTo(block2))
     }
 
