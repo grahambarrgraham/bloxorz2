@@ -9,7 +9,7 @@ import bloxorz.BloxorzGrid.TileState
 import bloxorz.BloxorzGrid.TileState.Missing
 import bloxorz.BloxorzGrid.TileState.Present
 import search.GraphSearch
-import java.lang.Math.abs
+import kotlin.math.abs
 
 
 object BloxorzGame {
@@ -18,8 +18,8 @@ object BloxorzGame {
         X, Y, Z
     }
 
-    enum class Action(val code: Char) {
-        Up('U'), Down('D'), Left('L'), Right('R'), Start('B'), SwitchBlock('S')
+    enum class Action {
+        Up, Down, Left, Right, SwitchBlock
     }
 
     data class Block(val location: Location, val orientation: Orientation, val height: Int)
@@ -28,22 +28,7 @@ object BloxorzGame {
         val activeBlock: Block,
         val ruleState: Map<Location, TileState>,
         val inactiveBlock: Block? = null
-    ) {
-        //TODO make this part of Path.
-        //this is a hack to hitch this information, but it isn't actually part part of the Vertex state.  Including
-        //this as part of the state leadds to poorer pruning in the search tree, as the same vertex is navigated
-        //multiple times, once for action will resulted in reaching it
-        var action: Action = Start
-
-        constructor(
-            activeBlock: Block,
-            ruleState: Map<Location, TileState>,
-            inactiveBlock: Block? = null,
-            action: Action
-        ) : this(activeBlock, ruleState, inactiveBlock) {
-            this.action = action
-        }
-    }
+    )
 
     data class Rule(
         val type: Type,
@@ -56,16 +41,17 @@ object BloxorzGame {
         }
     }
 
-    fun initialState(grid: Grid) = State(Block(grid.sourceLocation(), Z, 2), grid.initialRuleState(), action = Start)
+    fun initialState(grid: Grid) = State(Block(grid.sourceLocation(), Z, 2), grid.initialRuleState())
 
-    fun generateMoves(grid: Grid, v: State): List<GraphSearch.Edge<State>> {
+    fun generateMoves(grid: Grid, v: State): List<GraphSearch.Edge<State,Action>> {
+
+        data class Move(val action: Action, val state: State)
 
         return Action.values()
-            .filterNot { it == Start }
             .filterNot { it == SwitchBlock && v.inactiveBlock == null }
-            .map { generateNextState(grid, it, v) }
-            .filter { isLegal(grid, it) }
-            .map { GraphSearch.Edge(1, it) }
+            .map { Move(it, generateNextState(grid, it, v)) }
+            .filter { isLegal(grid, it.state) }
+            .map { GraphSearch.Edge(1, it.state, it.action) }
     }
 
     fun generateNextState(grid: Grid, action: Action, currentState: State): State {
@@ -78,16 +64,15 @@ object BloxorzGame {
 
         //SwitchBlock, swap active and inactive block
         if (action == SwitchBlock) {
-            if (currentState.inactiveBlock == null) {
-                return currentState
+            return if (currentState.inactiveBlock == null) {
+                currentState
             } else {
                 val state = State(
                     currentState.inactiveBlock,
                     currentState.ruleState,
-                    currentState.activeBlock,
-                    SwitchBlock
+                    currentState.activeBlock
                 )
-                return state
+                state
             }
         }
 
@@ -126,9 +111,7 @@ object BloxorzGame {
                 if (rule.type == Teleport) {
                     val activeBlock = Block(rule.objectLocation, Z, 1)
                     val block2 = Block(rule.secondObjectLocation!!, Z, 1)
-                    val state = State(activeBlock, currentState.ruleState, block2, action)
-
-                    return state
+                    return State(activeBlock, currentState.ruleState, block2)
                 }
             }
         }
@@ -142,15 +125,17 @@ object BloxorzGame {
 
         val newRuleState = applyRules(grid, currentState.ruleState, nextBlock)
 
-        return State(nextBlock, newRuleState, inactiveBlock = inactiveBlock, action = action)
+        return State(nextBlock, newRuleState, inactiveBlock = inactiveBlock)
     }
 
     private fun join(a: Block, b: Block): Block {
-        return if (a.location.x < b.location.x) Block(a.location, X, 2)
-        else if (b.location.x < a.location.x) Block(b.location, X, 2)
-        else if (a.location.y < b.location.y) Block(a.location, Y, 2)
-        else if (b.location.y < a.location.y) Block(b.location, Y, 2)
-        else throw Exception("Can't join $a and $b, they are the same")
+        return when {
+            a.location.x < b.location.x -> Block(a.location, X, 2)
+            b.location.x < a.location.x -> Block(b.location, X, 2)
+            a.location.y < b.location.y -> Block(a.location, Y, 2)
+            b.location.y < a.location.y -> Block(b.location, Y, 2)
+            else -> throw Exception("Can't join $a and $b, they are the same")
+        }
     }
 
     private fun adjacent(a: Location, b: Location): Boolean = abs(a.x - b.x) + abs(a.y - b.y) == 1

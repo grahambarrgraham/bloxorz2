@@ -1,7 +1,6 @@
 package bloxorz
 
 import bloxorz.BloxorzGame.Action
-import bloxorz.BloxorzGame.Action.Start
 import bloxorz.BloxorzGame.Action.SwitchBlock
 import bloxorz.BloxorzGame.Block
 import bloxorz.BloxorzGame.Orientation
@@ -301,11 +300,10 @@ class BloxorzGameTest {
         val block1 = Block(Location(0, 0), Z, 1)
         val block2 = Block(Location(1, 1), Z, 1)
         val state = State(block1, grid.initialRuleState(), block2)
-        val newState = BloxorzGame.generateNextState(grid, Action.SwitchBlock, state)
+        val newState = BloxorzGame.generateNextState(grid, SwitchBlock, state)
         assertThat(newState.ruleState, equalTo(state.ruleState))
         assertThat(newState.activeBlock, equalTo(block2))
         assertThat(newState.inactiveBlock, equalTo(block1))
-        assertThat(newState.action, equalTo(SwitchBlock))
     }
 
     @Test
@@ -313,7 +311,7 @@ class BloxorzGameTest {
         val grid = BloxorzGrid.load("/rules.txt")
         val block1 = Block(Location(0, 0), Z, 2)
         val state = State(block1, grid.initialRuleState())
-        val newState = BloxorzGame.generateNextState(grid, Action.SwitchBlock, state)
+        val newState = BloxorzGame.generateNextState(grid, SwitchBlock, state)
         assertThat(newState, equalTo(state))
     }
 
@@ -356,8 +354,7 @@ class BloxorzGameTest {
 
     private fun checkIsSink(activeBlock: Block, isSink: Boolean, secondBlock: Block ?= null) {
         val grid = BloxorzGrid.load("/rules.txt")
-        val anyLastAction = Start
-        val state = State(activeBlock, grid.initialRuleState(), secondBlock, action = anyLastAction)
+        val state = State(activeBlock, grid.initialRuleState(), secondBlock)
         assertThat(isAtSink(state, grid), `is`(isSink))
     }
 
@@ -372,7 +369,7 @@ class BloxorzGameTest {
     ) {
         //TODO refactor to be fluent fluent
         val grid = BloxorzGrid.load("/rules.txt")
-        val state = State(Block(startLoc, startOrientation, 2), grid.initialRuleState(), action = Start)
+        val state = State(Block(startLoc, startOrientation, 2), grid.initialRuleState())
         val newState = BloxorzGame.generateNextState(grid, action, state)
         assertThat(newState.ruleState, equalTo(state.ruleState))
         assertThat(newState.activeBlock, equalTo(Block(firstTargetLocation, firstBlockOrientation, firstBlockHeight)))
@@ -395,7 +392,7 @@ class BloxorzGameTest {
     ) {
         //TODO refactor to be fluent fluent
         val grid = BloxorzGrid.load("/rules.txt")
-        var state = State(Block(startLoc, startOrientation, height), grid.initialRuleState(), action = Start)
+        var state = State(Block(startLoc, startOrientation, height), grid.initialRuleState())
         state = BloxorzGame.generateNextState(grid, action, state)
         assertThat(state.ruleState[targetLocation], `is`(expectedState))
     }
@@ -411,8 +408,7 @@ class BloxorzGameTest {
         val grid = BloxorzGrid.load(gridName)
         val legal = isLegal(grid, State(
             Block(Location(x, y), orientation, height),
-            grid.initialRuleState(),
-            action = Start
+            grid.initialRuleState()
         ))
         assertThat(legal, `is`(expected))
     }

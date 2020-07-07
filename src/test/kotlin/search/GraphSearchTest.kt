@@ -187,7 +187,7 @@ class GraphSearchTest {
     }
 
 
-    private fun shortestPath(edges: List<Edge>, start: Vertex, finish: Vertex) : GraphSearch.Path<Vertex> {
+    private fun shortestPath(edges: List<Edge>, start: Vertex, finish: Vertex) : GraphSearch.Path<Vertex, String> {
 
         val duplexEdges = edges.plus(edges.map {
             Edge(
@@ -198,12 +198,12 @@ class GraphSearchTest {
         })
 
         fun generateActions(vertex: Vertex) = duplexEdges.filter { it.v1 == vertex }
-            .map { GraphSearch.Edge(it.cost, it.v2) }
+            .map { GraphSearch.Edge(it.cost, it.v2, "any action") }
 
         return GraphSearch.shortestPath(start, { v -> v == finish }, { v -> generateActions(v) })
     }
 
-    private fun allPaths(edges: List<Edge>, start: Vertex, finish: Vertex) : List<GraphSearch.Path<Vertex>> {
+    private fun allPaths(edges: List<Edge>, start: Vertex, finish: Vertex) : List<GraphSearch.Path<Vertex, String>> {
 
         val duplexEdges = edges.plus(edges.map {
             Edge(
@@ -214,7 +214,7 @@ class GraphSearchTest {
         })
 
         fun generateActions(vertex: Vertex) = duplexEdges.filter { it.v1 == vertex }
-            .map { GraphSearch.Edge(it.cost, it.v2) }
+            .map { GraphSearch.Edge(it.cost, it.v2, "any action") }
 
         return GraphSearch.allPaths(start, { v -> v == finish }, { v -> generateActions(v) }).toList()
     }

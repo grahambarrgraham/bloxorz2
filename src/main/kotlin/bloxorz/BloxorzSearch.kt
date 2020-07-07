@@ -1,7 +1,8 @@
 package bloxorz
 
 import bloxorz.BloxorzGame.Action
-import bloxorz.BloxorzGame.Action.Start
+import bloxorz.BloxorzGame.Action.*
+import bloxorz.BloxorzGame.State
 import bloxorz.BloxorzGame.generateMoves
 import bloxorz.BloxorzGame.generateNextState
 import bloxorz.BloxorzGame.initialState
@@ -15,8 +16,8 @@ object BloxorzSearch {
 
     class IllegalAction(message: String) : Exception(message)
 
-    data class SearchMetrics(val expansions:Int)
-    data class ShortestPathResult(val path: Path<BloxorzGame.State>, val metrics: SearchMetrics)
+    data class SearchMetrics(val expansions: Int)
+    data class ShortestPathResult(val path: Path<State, Action>, val metrics: SearchMetrics)
 
     fun shortestPath(filename: String): ShortestPathResult {
 
@@ -32,7 +33,7 @@ object BloxorzSearch {
         return ShortestPathResult(shortestPath, SearchMetrics(expansions))
     }
 
-    fun allPaths(filename: String): Sequence<Path<BloxorzGame.State>> {
+    fun allPaths(filename: String): Sequence<Path<State, Action>> {
 
         val grid = BloxorzGrid.load(filename)
         val initialState = initialState(grid)
@@ -68,12 +69,12 @@ object BloxorzSearch {
 
             return (0 until count).toList().map {
                 when (actionString) {
-                    'U' -> Action.Up
-                    'D' -> Action.Down
-                    'L' -> Action.Left
-                    'R' -> Action.Right
-                    'S' -> Action.SwitchBlock
-                    else -> Start
+                    'U' -> Up
+                    'D' -> Down
+                    'L' -> Left
+                    'R' -> Right
+                    'S' -> SwitchBlock
+                    else -> throw Exception("Unknown action : $actionString")
                 }
             }
         }
@@ -86,9 +87,16 @@ object BloxorzSearch {
             }.flatten()
     }
 
+    private fun code(action: Action): Char = when (action) {
+        Up -> 'U'
+        Down -> 'D'
+        Left -> 'L'
+        Right -> 'R'
+        SwitchBlock -> 'S'
+    }
 
-    fun condensedFormat(path: Path<BloxorzGame.State>): String {
-        return condensedFormat(path.history.map {it.destination.action.code})
+    fun condensedFormat(path: Path<State, Action>): String {
+        return condensedFormat(path.history.map { code(it.action) })
     }
 
     fun condensedFormat(path: List<Char>): String {
@@ -115,9 +123,9 @@ object BloxorzSearch {
         return result.toString()
     }
 
-    fun detailedFormat(path: Path<BloxorzGame.State>): String {
+    fun detailedFormat(path: Path<State, Action>): String {
         return path.history.map {
-            "${it.destination.action.code}" +
+            "${code(it.action)}" +
                     "->(${it.destination.activeBlock.location.x},${it.destination.activeBlock.location.y})" +
                     "${it.destination.activeBlock.orientation}/${it.destination.activeBlock.height}"
         }
@@ -129,11 +137,11 @@ object BloxorzSearch {
 
         var totalCost = 0
         var completedLevels = 0
-            //.filterNot { listOf(23, 26, 28).contains(it) }
-        (1..33).asSequence().filterNot { listOf(23).contains(it) }.forEach {
+        //.filterNot { listOf(23, 26, 28).contains(it) }
+        (1..33).asSequence().forEach {
             try {
-                var millis: Long = 0L
-                val searchResult = measureTimeMillis({ time -> millis = time}) {shortestPath("/level${it}.txt")}
+                var millis = 0L
+                val searchResult = measureTimeMillis({ time -> millis = time }) { shortestPath("/level${it}.txt") }
                 val condensedFormat = condensedFormat(searchResult.path)
                 println("level $it : ${searchResult.path.cost} moves : $condensedFormat took $millis ms with ${searchResult.metrics.expansions} expansions")
 
@@ -147,8 +155,10 @@ object BloxorzSearch {
         println("Summary : completed $completedLevels of 33 levels, total moves : $totalCost")
     }
 
-    inline fun <T> measureTimeMillis(loggingFunction: (Long) -> Unit,
-                                     function: () -> T): T {
+    inline fun <T> measureTimeMillis(
+        loggingFunction: (Long) -> Unit,
+        function: () -> T
+    ): T {
 
         val startTime = System.currentTimeMillis()
         val result: T = function.invoke()
