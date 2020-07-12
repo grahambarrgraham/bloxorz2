@@ -22,11 +22,15 @@ object GraphSearch {
     fun <Vertex, Action> shortestPath(
         source: Vertex,
         isSink: (Vertex) -> Boolean,
-        edges: (Vertex) -> List<Edge<Vertex, Action>>
+        edges: (Vertex) -> List<Edge<Vertex, Action>>,
+        heuristic: (Vertex) -> Int = { 0 },
+        monitor: (Path<Vertex, Action>) -> Unit = {}
     ): Path<Vertex, Action> = allPaths(
         source,
         isSink,
-        edges
+        edges,
+        heuristic,
+        monitor
     ).firstOrNull() ?: throw NoPathFound()
 
 
@@ -39,10 +43,12 @@ object GraphSearch {
     fun <Vertex, Action> allPaths(
         source: Vertex,
         isSink: (Vertex) -> Boolean,
-        edges: (Vertex) -> List<Edge<Vertex, Action>>
+        edges: (Vertex) -> List<Edge<Vertex, Action>>,
+        heuristic: (Vertex) -> Int = { 0 },
+        monitor: (Path<Vertex, Action>) -> Unit = {}
     ): Sequence<Path<Vertex, Action>> {
 
-        val queue = PriorityQueue<Path<Vertex, Action>>(compareBy<Path<Vertex, Action>> { it.cost }.thenBy { it.history.size })
+        val queue = PriorityQueue<Path<Vertex, Action>>(compareBy<Path<Vertex, Action>> { it.cost })
         val visited = mutableSetOf<Vertex>()
 
         fun currentVertex(path: Path<Vertex, Action>) = path.history.lastOrNull()?.destination ?: source
@@ -55,14 +61,16 @@ object GraphSearch {
                 val path = queue.poll() ?: break
                 val vertex = currentVertex(path)
 
+                monitor(path)
+
                 if (isSink(vertex)) {
                     yield(path)
                 }
 
                 edges(vertex).forEach {
-                    val nextPath = Path(path.cost + it.cost, path.history + it)
 
-                    //if (nextPath.cost < cheapest) {
+                    val nextPath = Path(path.cost + it.cost + heuristic.invoke(it.destination), path.history + it)
+
                     if (!visited.contains(it.destination)) {
                         queue.add(nextPath)
                         visited.add(vertex)

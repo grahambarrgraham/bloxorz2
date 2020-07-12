@@ -1,18 +1,19 @@
 package bloxorz
 
-import bloxorz.BloxorzGame.Action.*
-import bloxorz.BloxorzGame.Orientation.*
-import bloxorz.BloxorzGame.Rule.Type.*
-import bloxorz.BloxorzGrid.Grid
-import bloxorz.BloxorzGrid.Location
-import bloxorz.BloxorzGrid.TileState
-import bloxorz.BloxorzGrid.TileState.Missing
-import bloxorz.BloxorzGrid.TileState.Present
+import bloxorz.Game.Action.*
+import bloxorz.Game.GameDirection.Forward
+import bloxorz.Game.Orientation.*
+import bloxorz.Game.Rule.Type.*
+import bloxorz.Grid.Grid
+import bloxorz.Grid.Location
+import bloxorz.Grid.TileState
+import bloxorz.Grid.TileState.Missing
+import bloxorz.Grid.TileState.Present
 import search.GraphSearch
 import kotlin.math.abs
 
 
-object BloxorzGame {
+object Game {
 
     enum class Orientation {
         X, Y, Z
@@ -22,13 +23,22 @@ object BloxorzGame {
         Up, Down, Left, Right, SwitchBlock
     }
 
+    enum class GameDirection { Forward, Backward }
+
     data class Block(val location: Location, val orientation: Orientation, val height: Int)
 
     data class State(
         val activeBlock: Block,
         val ruleState: Map<Location, TileState>,
         val inactiveBlock: Block? = null
-    )
+    ) {
+        override fun toString(): String {
+            fun blockFormatCondensed(b: Block?) = if (b == null) "()" else "(${b.location.x},${b.location.y},${b.orientation.toString()[0]})"
+            return blockFormatCondensed(activeBlock) +
+                    blockFormatCondensed(inactiveBlock) +
+                    ruleState.map { e -> "(${e.key.x}, ${e.key.y}, ${e.value.toString()[0]})" }
+        }
+    }
 
     data class Rule(
         val type: Type,
@@ -43,7 +53,7 @@ object BloxorzGame {
 
     fun initialState(grid: Grid) = State(Block(grid.sourceLocation(), Z, 2), grid.initialRuleState())
 
-    fun generateMoves(grid: Grid, v: State): List<GraphSearch.Edge<State,Action>> {
+    fun generateMoves(grid: Grid, v: State, gameDirection: GameDirection = Forward): List<GraphSearch.Edge<State, Action>> {
 
         data class Move(val action: Action, val state: State)
 
@@ -79,11 +89,11 @@ object BloxorzGame {
         //move block, create next block
         var nextBlock = if (blockHeight == 1) {
             //optimisation - when block is height 1, orientation is not important, so remove it from the search space
-            when(action) {
-                Up -> Block(Location(x, y+1), Z, 1)
-                Down -> Block(Location(x, y-1), Z, 1)
-                Left -> Block(Location(x-1, y), Z, 1)
-                Right -> Block(Location(x+1, y), Z, 1)
+            when (action) {
+                Up -> Block(Location(x, y + 1), Z, 1)
+                Down -> Block(Location(x, y - 1), Z, 1)
+                Left -> Block(Location(x - 1, y), Z, 1)
+                Right -> Block(Location(x + 1, y), Z, 1)
                 else -> throw RuntimeException("Invalid action $action in orientation $orientation")
             }
         } else when (Pair(action, orientation)) {
@@ -183,10 +193,15 @@ object BloxorzGame {
             else -> listOf(block.location)
         }
 
-    fun isAtSink(state: State, grid: Grid) =
-        state.activeBlock.location == grid.sinkLocation()
+    fun isAtSink(
+        grid: Grid,
+        state: State,
+        sinkLocation: Location = grid.sinkLocation()
+    ): Boolean {
+        return (state.activeBlock.location == sinkLocation
                 && state.activeBlock.orientation == Z
                 && state.activeBlock.height > 1
-                && state.inactiveBlock == null
+                && state.inactiveBlock == null)
+    }
 
 }

@@ -1,12 +1,12 @@
 package bloxorz
 
-import bloxorz.BloxorzGame.Rule
-import bloxorz.BloxorzGame.Rule.Type.Teleport
-import bloxorz.BloxorzGrid.Grid.UnknownRuleType
-import bloxorz.BloxorzGrid.TileState.Missing
-import bloxorz.BloxorzGrid.TileState.Present
+import bloxorz.Game.Rule
+import bloxorz.Game.Rule.Type.Teleport
+import bloxorz.Grid.Grid.UnknownRuleType
+import bloxorz.Grid.TileState.Missing
+import bloxorz.Grid.TileState.Present
 
-object BloxorzGrid {
+object Grid {
 
     data class Location(val x: Int, val y: Int)
 

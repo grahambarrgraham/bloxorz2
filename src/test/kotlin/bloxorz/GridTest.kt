@@ -1,16 +1,16 @@
 package bloxorz
 
-import bloxorz.BloxorzGame.Rule
-import bloxorz.BloxorzGame.Rule.*
-import bloxorz.BloxorzGrid.Location
-import bloxorz.BloxorzGrid.TileState.*
-import bloxorz.BloxorzGrid.load
+import bloxorz.Game.Rule
+import bloxorz.Game.Rule.*
+import bloxorz.Grid.Location
+import bloxorz.Grid.TileState.*
+import bloxorz.Grid.load
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.core.Is.`is`
 import org.junit.Test
 
-class BloxorzGridTest {
+class GridTest {
 
     @Test
     fun loadGrid_GridIsLoaded() {
