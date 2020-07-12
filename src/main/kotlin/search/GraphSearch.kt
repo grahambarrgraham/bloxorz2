@@ -48,7 +48,7 @@ object GraphSearch {
         monitor: (Path<Vertex, Action>) -> Unit = {}
     ): Sequence<Path<Vertex, Action>> {
 
-        val queue = PriorityQueue<Path<Vertex, Action>>(compareBy<Path<Vertex, Action>> { it.cost })
+        val queue = PriorityQueue<Path<Vertex, Action>>(compareBy<Path<Vertex, Action>> { it.cost }.thenBy { it.history.size })
         val visited = mutableSetOf<Vertex>()
 
         fun currentVertex(path: Path<Vertex, Action>) = path.history.lastOrNull()?.destination ?: source
