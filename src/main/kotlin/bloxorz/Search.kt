@@ -20,23 +20,23 @@ object Search {
 
     data class ShortestPathResult(val path: Path<State, Action>, val metrics: SearchMetrics)
 
-    fun shortestPath(
+    fun allPaths(
         source: State,
         isSink: (State) -> Boolean,
         edges: (State) -> List<GraphSearch.Edge<State, Action>>,
         heuristic: (State) -> Int = { 0 },
         monitor: (Path<State, Action>) -> Unit = {}
-    ): ShortestPathResult {
+    ): Sequence<ShortestPathResult> {
         val metrics = SearchMetrics()
 
-        val path = GraphSearch.shortestPath(
+        return GraphSearch.allPaths(
             source,
             isSink,
             edges,
             heuristic,
-            { path: Path<State, Action> -> metrics.expansions++; monitor(path) }
-        )
-        return ShortestPathResult(path, metrics)
+            { path: Path<State, Action> -> metrics.expansions++; monitor(path) },
+            tieBreaker = {it.history.count() { a -> a.action == Action.SwitchBlock }}
+        ).map {ShortestPathResult(it, metrics)}
     }
 
     fun shortestPath(
@@ -47,15 +47,15 @@ object Search {
         heuristic: (State) -> Int = { 0 },
         monitor: (Path<State, Action>) -> Unit = {}
     ): ShortestPathResult {
-        return shortestPath(source, isSink, { generateMoves(grid, it, direction) }, heuristic, monitor)
+        return allPaths(source, isSink, { generateMoves(grid, it, direction) }, heuristic, monitor).first()
     }
 
-    fun shortestPathForward(
+    fun allPathsForward(
         grid: Grid,
         initialState: State = initialState(grid),
         heuristic: (State) -> Int = { 0 },
         monitor: (Path<State, Action>) -> Unit = {}
-    ): ShortestPathResult = shortestPath(
+    ): Sequence<ShortestPathResult> = allPaths(
         initialState,
         { isAtSink(grid, it) },
         { generateMoves(grid, it, GameDirection.Forward) },
@@ -63,19 +63,31 @@ object Search {
         monitor
     )
 
+    fun shortestPathForward(
+        grid: Grid,
+        initialState: State = initialState(grid),
+        heuristic: (State) -> Int = { 0 },
+        monitor: (Path<State, Action>) -> Unit = {}
+    ): ShortestPathResult = allPathsForward(
+        grid,
+        initialState,
+        heuristic,
+        monitor
+    ).firstOrNull() ?: throw GraphSearch.NoPathFound()
+
     fun shortestPathBackward(
         grid: Grid,
         source: State,
         sink: State = initialState(grid),
         heuristic: (State) -> Int = { 0 },
         monitor: (Path<State, Action>) -> Unit = {}
-    ): ShortestPathResult = shortestPath(
+    ): ShortestPathResult = allPaths(
         source,
         { it == sink },
         { generateMoves(grid, it, GameDirection.Backward) },
         heuristic,
         monitor
-    )
+    ).firstOrNull() ?: throw GraphSearch.NoPathFound()
 
     fun approximateStraightLineDistanceToLocation(it: State, location: Location): Int {
 

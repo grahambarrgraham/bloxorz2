@@ -24,13 +24,15 @@ object GraphSearch {
         isSink: (Vertex) -> Boolean,
         edges: (Vertex) -> List<Edge<Vertex, Action>>,
         heuristic: (Vertex) -> Int = { 0 },
-        monitor: (Path<Vertex, Action>) -> Unit = {}
+        monitor: (Path<Vertex, Action>) -> Unit = {},
+        tieBreaker: (Path<Vertex, Action>) -> Int = { 0 }
     ): Path<Vertex, Action> = allPaths(
         source,
         isSink,
         edges,
         heuristic,
-        monitor
+        monitor,
+        tieBreaker
     ).firstOrNull() ?: throw NoPathFound()
 
 
@@ -45,10 +47,16 @@ object GraphSearch {
         isSink: (Vertex) -> Boolean,
         edges: (Vertex) -> List<Edge<Vertex, Action>>,
         heuristic: (Vertex) -> Int = { 0 },
-        monitor: (Path<Vertex, Action>) -> Unit = {}
+        monitor: (Path<Vertex, Action>) -> Unit = {},
+        tieBreaker: (Path<Vertex, Action>) -> Int = { 0 }
     ): Sequence<Path<Vertex, Action>> {
 
-        val queue = PriorityQueue<Path<Vertex, Action>>(compareBy<Path<Vertex, Action>> { it.cost }.thenBy { it.history.size })
+        val queue = PriorityQueue<Path<Vertex, Action>>(
+            compareBy<Path<Vertex, Action>> { it.cost }
+                .thenBy { it.history.size }
+                .thenBy(tieBreaker)
+        )
+
         val visited = mutableSetOf<Vertex>()
 
         fun currentVertex(path: Path<Vertex, Action>) = path.history.lastOrNull()?.destination ?: source

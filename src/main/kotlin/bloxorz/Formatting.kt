@@ -35,7 +35,8 @@ object Formatting {
 
         return condensedFormat.substringAfter('[')
             .substringBefore(']')
-            .split(", ")
+            .split(",")
+            .map { it.trim() }
             .map {
                 expandRepeated(it)
             }.flatten()
